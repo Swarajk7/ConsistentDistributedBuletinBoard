@@ -1,6 +1,9 @@
 package distributed.consistent.server;
 
 import distributed.consistent.Utility;
+import distributed.consistent.database.ArticleRepository;
+import distributed.consistent.server.interfaces.IClientServerCommunication;
+import distributed.consistent.server.interfaces.IInterServerCommunication;
 
 import java.io.IOException;
 import java.net.InetAddress;
@@ -9,8 +12,11 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.rmi.Naming;
 import java.rmi.registry.LocateRegistry;
+import java.rmi.registry.Registry;
 
 public class Server {
+
+    private static Registry registry;
 
     private static int parseAndGetPortNumber(String[] args) {
         //take port number as command line argument
@@ -61,22 +67,33 @@ public class Server {
             String ip = getIP();
             int port = parseAndGetPortNumber(args);
 
-            ServerInfoRepository serverInfoRepository= ServerInfoRepository.create();
-            serverInfoRepository.register(ip,port);
+            ServerInfoRepository serverInfoRepository = ServerInfoRepository.create();
+            serverInfoRepository.register(ip, port);
+
             if (!serverInfoRepository.isLeader()) {
+                // if not a leader, join Main Server
                 joinMainServer(serverInfoRepository);
             } else {
                 System.out.println("I AM THE BOSS!!");
             }
 
-            Path currentRelativePath = Paths.get("");
-            String s = currentRelativePath.toAbsolutePath().toString();
-            System.out.println("Current relative path is: " + s);
+            // Initiate database with no primary key if false, with autoinc primary key otherwise.
+            Utility utility = new Utility();
+            String dbpath = utility.getDatabaseName(serverInfoRepository.getOwnInfo().getPort());
+            ArticleRepository articleRepository = new ArticleRepository(dbpath);
+            articleRepository.InitiateDatabase(serverInfoRepository.isLeader());
 
-            //LocateRegistry.createRegistry(port);
-            InterServerCommunication stub = new InterServerCommunication();
-            Naming.rebind(getRMIEndpoint(ip,port,ConfigManager.create().getValue(ConfigManager.RMI_BINDING_NAME)), stub);
+            // start rmiregistry
+            registry = LocateRegistry.createRegistry(port);
 
+            // start interserver thread
+            IInterServerCommunication stub = new InterServerCommunication();
+            Naming.rebind(getRMIEndpoint(ip, port, ConfigManager.create().getValue(ConfigManager.RMI_BINDING_NAME)), stub);
+
+            IClientServerCommunication stub2 = new ClientServerCommunication();
+            Naming.rebind(getRMIEndpoint(ip, port,
+                    ConfigManager.create().getValue(ConfigManager.RMI_BINDING_NAME) + "client"),
+                    stub2);
         } catch (Exception ex) {
             ex.printStackTrace();
         }

@@ -25,6 +25,7 @@ public class ServerInfoRepository {
     private HashSet<ServerInfo> connectedServerList;
     private ServerInfoRepository() {
         hasRegistered = false;
+        connectedServerList = new HashSet<>();
     }
 
     public static ServerInfoRepository create(){

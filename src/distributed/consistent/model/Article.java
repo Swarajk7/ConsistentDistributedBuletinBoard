@@ -1,8 +1,10 @@
 package distributed.consistent.model;
 
-public class Article {
-    int id;
-    String content;
+import java.io.Serializable;
+
+public class Article implements Serializable{
+    private int id;
+    private String content;
 
     public Article(int id, String content) {
         this.id = id;

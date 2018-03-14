@@ -1,4 +1,4 @@
-package distributed.consistent.server;
+package distributed.consistent.server.interfaces;
 
 import java.rmi.Remote;
 import java.rmi.RemoteException;
@@ -9,5 +9,5 @@ public interface IInterServerCommunication extends Remote {
 
     void leaveMainServer(String rmi_registry_address, String rmi_binding_name, int portnum) throws RemoteException;
 
-    void PostArticleAtMainServer(String rmi_registry_address, String rmi_binding_name, int portnum, String content) throws RemoteException;
+    void InitiatePostArticleAtMainServer(String rmi_registry_address, String rmi_binding_name, int portnum, String content) throws RemoteException;
 }

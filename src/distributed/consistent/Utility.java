@@ -1,5 +1,8 @@
 package distributed.consistent;
 
+import distributed.consistent.server.ConfigManager;
+
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -71,5 +74,9 @@ public class Utility {
 
     public String createKeyForServerInfo(String ip, int port, String bindingname) {
         return ip + "#" + port + "#" + bindingname;
+    }
+
+    public String getDatabaseName(int port) throws IOException {
+        return ConfigManager.create().getValue(ConfigManager.DATABASE_FILE_PATH) + port;
     }
 }

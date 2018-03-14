@@ -10,7 +10,7 @@ public class ArticleRepository {
     private Connection getConnection() throws ClassNotFoundException, SQLException {
         Class.forName("org.sqlite.JDBC");
         //create tge database if does not exist.
-        return DriverManager.getConnection("jdbc:sqlite:" + this.databaseFilePath);
+        return DriverManager.getConnection("jdbc:sqlite:" + this.databaseFilePath + ".db");
     }
 
     public ArticleRepository(String databaseFilePath) {
@@ -40,7 +40,6 @@ public class ArticleRepository {
         Article article = null;
         if (rs.isBeforeFirst()) {
             article = new Article(rs.getInt("ID"), rs.getString("Content"));
-            return article;
         }
         stmt.close();
         connection.close();
