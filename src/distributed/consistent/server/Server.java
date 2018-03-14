@@ -62,22 +62,24 @@ public class Server {
         System.out.println("Your current RMI address : " + rmi_end_point);
         return rmi_end_point;
     }
+
     public static void main(String[] args) {
         try {
-            String ip = getIP();
-            int port = parseAndGetPortNumber(args);
+            String ip = getIP(); //get the ip from machine
+            int port = parseAndGetPortNumber(args); // get port number from args
 
-            ServerInfoRepository serverInfoRepository = ServerInfoRepository.create();
-            serverInfoRepository.register(ip, port);
+            ServerInfoRepository serverInfoRepository = ServerInfoRepository.create(); //create a repository to deal with server details
+            serverInfoRepository.register(ip, port); //register it self. It will just add itself to repository. It's like a place to query about server.
 
             if (!serverInfoRepository.isLeader()) {
-                // if not a leader, join Main Server
+                // if not a leader, join Main Server. Main server will add these other servers to a hashset inside ServerRepository class.
                 joinMainServer(serverInfoRepository);
             } else {
                 System.out.println("I AM THE BOSS!!");
             }
 
             // Initiate database with no primary key if false, with autoinc primary key otherwise.
+            // this will create database if not exists. So we are okay.
             Utility utility = new Utility();
             String dbpath = utility.getDatabaseName(serverInfoRepository.getOwnInfo().getPort());
             ArticleRepository articleRepository = new ArticleRepository(dbpath);
@@ -86,10 +88,11 @@ public class Server {
             // start rmiregistry
             registry = LocateRegistry.createRegistry(port);
 
-            // start interserver thread
+            // start interserver RMI
             IInterServerCommunication stub = new InterServerCommunication();
             Naming.rebind(getRMIEndpoint(ip, port, ConfigManager.create().getValue(ConfigManager.RMI_BINDING_NAME)), stub);
 
+            // start client communication RMI
             IClientServerCommunication stub2 = new ClientServerCommunication();
             Naming.rebind(getRMIEndpoint(ip, port,
                     ConfigManager.create().getValue(ConfigManager.RMI_BINDING_NAME) + "client"),
