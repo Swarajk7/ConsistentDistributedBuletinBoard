@@ -49,7 +49,7 @@ public class Utility {
         return IP + ":" + port;
     }
 
-    String createRMIConnectionString(String ip, int port, String binding_name) {
+    public String createRMIConnectionString(String ip, int port, String binding_name) {
         return "rmi://" + ip + ":" + port + "/" + binding_name;
     }
 

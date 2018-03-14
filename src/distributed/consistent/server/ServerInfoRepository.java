@@ -27,21 +27,18 @@ public class ServerInfoRepository {
         hasRegistered = false;
     }
 
-    public static ServerInfoRepository create() throws IOException {
+    public static ServerInfoRepository create(){
         if (repository == null) repository = new ServerInfoRepository();
         return repository;
     }
 
-    public void register(String ip) throws IOException {
+    public void register(String ip, int port) throws IOException {
         hasRegistered = true;
         ConfigManager configManager = ConfigManager.create();
-        this.ownInfo.setIp(ip);
-        this.ownInfo.setPort(configManager.getIntegerValue(ConfigManager.RMI_PORT_NUMBER));
-        this.ownInfo.setBindingname(configManager.getValue(ConfigManager.RMI_BINDING_NAME));
-        if (configManager.getValue(ConfigManager.LEADER_IP_ADDRESS) == ownInfo.getIp()
-                && configManager.getIntegerValue(ConfigManager.RMI_PORT_NUMBER) == ownInfo.getPort())
-            this.isLeader = true;
-        else this.isLeader = false;
+        this.ownInfo = new ServerInfo(ip, port,
+                configManager.getValue(ConfigManager.RMI_BINDING_NAME));
+        this.isLeader = configManager.getValue(ConfigManager.LEADER_IP_ADDRESS).equals(ownInfo.getIp())
+                && (configManager.getIntegerValue(ConfigManager.LEADER_PORT_NUMBER) == ownInfo.getPort());
     }
 
     public void addServerAddress(String ip, int port,String binidingName) throws Exception {
@@ -61,5 +58,9 @@ public class ServerInfoRepository {
     public boolean isLeader() throws Exception {
         if(!hasRegistered) throw new Exception("Please register first by calling register()");
         return isLeader;
+    }
+
+    public ServerInfo getOwnInfo() {
+        return ownInfo;
     }
 }
