@@ -6,8 +6,7 @@ import distributed.consistent.server.interfaces.IClientServerCommunication;
 import distributed.consistent.server.interfaces.IInterServerCommunication;
 
 import java.io.IOException;
-import java.net.InetAddress;
-import java.net.UnknownHostException;
+import java.net.*;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.rmi.Naming;
@@ -64,6 +63,7 @@ public class Server {
     }
 
     public static void main(String[] args) {
+
         try {
             String ip = getIP(); //get the ip from machine
             int port = parseAndGetPortNumber(args); // get port number from args
@@ -74,6 +74,34 @@ public class Server {
             if (!serverInfoRepository.isLeader()) {
                 // if not a leader, join Main Server. Main server will add these other servers to a hashset inside ServerRepository class.
                 joinMainServer(serverInfoRepository);
+
+                String INET_ADDR = "224.0.0.3";
+                final int PORT = 8888;
+                InetAddress address = InetAddress.getByName(INET_ADDR);
+
+                // Create a buffer of bytes, which will be used to store
+                // the incoming bytes containing the information from the server.
+                // Since the message is small here, 256 bytes should be enough.
+                byte[] buf = new byte[256];
+
+                // Create a new Multicast socket (that will allow other sockets/programs
+                // to join it as well.
+                try (MulticastSocket clientSocket = new MulticastSocket(PORT)) {
+                    //Joint the Multicast group.
+                    clientSocket.joinGroup(address);
+
+                    while (true) {
+                        // Receive the information and print it.
+                        DatagramPacket msgPacket = new DatagramPacket(buf, buf.length);
+                        clientSocket.receive(msgPacket);
+
+                        String msg = new String(buf, 0, buf.length);
+                        System.out.println("Socket 1 received msg: " + msg);
+                    }
+                }catch (Exception ex) {
+                    ex.printStackTrace();
+                }
+
             } else {
                 System.out.println("I AM THE BOSS!!");
             }
