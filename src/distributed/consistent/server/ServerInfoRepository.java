@@ -1,19 +1,8 @@
 package distributed.consistent.server;
 
-import distributed.consistent.Utility;
-import javafx.util.Pair;
-import jdk.jshell.spi.ExecutionControl;
 
 import java.io.IOException;
-import java.rmi.RemoteException;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Queue;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentLinkedQueue;
-
-import static javax.swing.plaf.synth.ColorType.MAX_COUNT;
+import java.util.*;
 
 
 public class ServerInfoRepository {
@@ -63,5 +52,9 @@ public class ServerInfoRepository {
 
     public ServerInfo getOwnInfo() {
         return ownInfo;
+    }
+
+    public ArrayList<ServerInfo> getConnectedServerList() {
+        return  new ArrayList<ServerInfo>(this.connectedServerList);
     }
 }

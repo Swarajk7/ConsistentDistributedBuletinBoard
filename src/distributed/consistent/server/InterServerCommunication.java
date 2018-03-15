@@ -3,12 +3,16 @@ package distributed.consistent.server;
 import distributed.consistent.Utility;
 import distributed.consistent.database.ArticleRepository;
 import distributed.consistent.server.interfaces.IInterServerCommunication;
+import distributed.consistent.server.threads.CallReplicaServerThread;
 
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
+import java.rmi.Naming;
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
+import java.util.ArrayList;
+import java.util.HashSet;
 
 public class InterServerCommunication extends UnicastRemoteObject implements IInterServerCommunication {
     InterServerCommunication() throws RemoteException {
@@ -49,26 +53,40 @@ public class InterServerCommunication extends UnicastRemoteObject implements IIn
 
             System.out.println(generatedArticleId + " : " + content);
 
-            String INET_ADDR = "224.0.0.3";
-            final int PORT = 8888;
-            try (DatagramSocket serverSocket = new DatagramSocket()) {
-                for (int i = 0; i < 5; i++) {
-                    String msg = "Sent message no " + i;
-                    // Create a packet that will contain the data
-                    // (in the form of bytes) and send it.
-                    DatagramPacket msgPacket = new DatagramPacket(msg.getBytes(),
-                            msg.getBytes().length, InetAddress.getByName(INET_ADDR), PORT);
-                    serverSocket.send(msgPacket);
-                    System.out.println("Server sent packet with msg: " + msg);
-                    Thread.sleep(500);
+            // Generate multiple threads and call WriteArticleAtReplica function
+            ConfigManager configManager = ConfigManager.create();
+            int numer_of_publisher_threads = configManager.getIntegerValue(ConfigManager.NUMBER_OF_PUBLISH_THREADS);
+
+            ArrayList<ServerInfo> allReplicaServers = serverInfoRepository.getConnectedServerList();
+
+            int index = 0;
+            while (index < allReplicaServers.size()) {
+                CallReplicaServerThread[] threads = new CallReplicaServerThread[numer_of_publisher_threads];
+                for (int i = 0; i < numer_of_publisher_threads && index < allReplicaServers.size(); i++) {
+                    threads[i] = new CallReplicaServerThread(allReplicaServers.get(index), generatedArticleId, content);
+                    threads[i].start();
+                    i++;
+                    index++;
                 }
-            } catch (Exception ex) {
-                ex.printStackTrace();
+                for (int i = 0; i < numer_of_publisher_threads; i++) if (threads[i] != null) threads[i].join();
             }
 
-            //tell other servers to update the data at their side asynchronously
-            //by queuing and calling their endpoint synchornously
-            //mean while client can poll the original replica for status update
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            throw new RemoteException(ex.getMessage());
+        }
+    }
+
+    @Override
+    public void WriteArticleAtReplica(int id, String content, int parentid) throws RemoteException {
+        System.out.println(id + " -- " + content + " -- " + parentid);
+        try {
+            ServerInfoRepository serverInfoRepository = ServerInfoRepository.create();
+            if (serverInfoRepository.isLeader()) throw new RemoteException("Not supported for leader!");
+
+            Utility utility = new Utility();
+            ArticleRepository repository = new ArticleRepository(utility.getDatabaseName(serverInfoRepository.getOwnInfo().getPort()));
+            repository.WriteArticle(id, content, parentid);
         } catch (Exception ex) {
             throw new RemoteException(ex.getMessage());
         }
