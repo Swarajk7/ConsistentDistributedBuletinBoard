@@ -4,7 +4,7 @@ import distributed.consistent.database.ArticleRepository;
 import distributed.consistent.model.Article;
 import distributed.consistent.server.interfaces.IClientServerCommunication;
 import distributed.consistent.server.interfaces.IProtocol;
-import jdk.jshell.spi.ExecutionControl;
+
 
 import java.io.IOException;
 import java.rmi.NotBoundException;
@@ -28,11 +28,20 @@ public class ClientServerCommunication  extends UnicastRemoteObject implements I
     }
 
     @Override
-    public int postArticle(String content) throws RemoteException {
+    public Article[] readArticles(int id) throws RemoteException {
+        try {
+            return getProtocol().ReadArticles(id);
+        } catch (Exception e) {
+            throw new RemoteException(e.getMessage());
+        }
+    }
+
+    @Override
+    public int postArticle(String content, int parentId) throws RemoteException {
         System.out.println(content);
         try {
             IProtocol protocol = getProtocol();
-            protocol.RequestMainServerForWrite(content);
+            protocol.RequestMainServerForWrite(content,parentId);
         } catch (Exception e) {
             throw new RemoteException(e.getMessage());
         }
@@ -44,10 +53,7 @@ public class ClientServerCommunication  extends UnicastRemoteObject implements I
         return new SequentialProtocol();
     }
 
-    @Override
-    public int reply(String content, int parentId) throws RemoteException {
-        return 0;
-    }
+
 
     @Override
     public List<String> getListOfServers() throws RemoteException {

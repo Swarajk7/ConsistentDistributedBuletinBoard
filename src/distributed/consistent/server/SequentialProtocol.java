@@ -31,13 +31,16 @@ public class SequentialProtocol implements IProtocol {
         return (IInterServerCommunication) Naming.lookup(serverEndPoint);
     }
 
-    public void RequestMainServerForWrite(String content) throws Exception {
+    public void RequestMainServerForWrite(String content, int parentId) throws Exception {
         ServerInfoRepository serverInfoRepository = ServerInfoRepository.create();
         // initiate write request at main server by calling InitiatePost method.
         // after this message main server will start propagating messages to other servers.
         getRMIStub().InitiatePostArticleAtMainServer(serverInfoRepository.getOwnInfo().getIp(), serverInfoRepository.getOwnInfo().getBindingname(),
-                serverInfoRepository.getOwnInfo().getPort(), content);
+                serverInfoRepository.getOwnInfo().getPort(), content, parentId);
     }
+
+
+
 
     @Override
     public Article ReadArticle(int id) throws SQLException, ClassNotFoundException, IOException {
@@ -48,5 +51,16 @@ public class SequentialProtocol implements IProtocol {
             // hoping that article would already have been propagated.
             ArticleRepository repository = new ArticleRepository(utility.getDatabaseName(serverInfoRepository.getOwnInfo().getPort()));
             return  repository.ReadArticle(id);
+    }
+
+    @Override
+    public Article[] ReadArticles(int id) throws SQLException, ClassNotFoundException, IOException {
+        ServerInfoRepository serverInfoRepository = ServerInfoRepository.create();
+        Utility utility = new Utility();
+
+        // Read article from own database using current article id.
+        // hoping that article would already have been propagated.
+        ArticleRepository repository = new ArticleRepository(utility.getDatabaseName(serverInfoRepository.getOwnInfo().getPort()));
+        return  repository.ReadArticles(id);
     }
 }

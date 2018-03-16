@@ -13,12 +13,14 @@ public class CallReplicaServerThread extends Thread implements Runnable {
     private final String content;
     private final ServerInfo serverInfo;
     private final int id;
+    private final int parentId;
 
-    public CallReplicaServerThread(ServerInfo serverInfo, int id, String content) {
+    public CallReplicaServerThread(ServerInfo serverInfo, int id, String content, int parentId) {
         super();
         this.serverInfo = serverInfo;
         this.id = id;
         this.content = content;
+        this.parentId = parentId;
     }
 
     @Override
@@ -31,7 +33,7 @@ public class CallReplicaServerThread extends Thread implements Runnable {
             System.out.println(serverEndPoint);
             IInterServerCommunication stub = (IInterServerCommunication) Naming.lookup(serverEndPoint);
 
-            stub.WriteArticleAtReplica(this.id, this.content, -1);
+            stub.WriteArticleAtReplica(this.id, this.content,this.parentId);
         } catch (Exception e) {
             e.printStackTrace();
         }

@@ -42,14 +42,14 @@ public class InterServerCommunication extends UnicastRemoteObject implements IIn
     }
 
     public void InitiatePostArticleAtMainServer(String rmi_registry_address, String rmi_binding_name,
-                                                int portnum, String content) throws RemoteException {
+                                                int portnum, String content, int parentId) throws RemoteException {
         System.out.println(rmi_registry_address + ":" + portnum + "/" + rmi_binding_name + " -- " + content);
         try {
             ServerInfoRepository serverInfoRepository = ServerInfoRepository.create();
             Utility utility = new Utility();
 
             ArticleRepository repository = new ArticleRepository(utility.getDatabaseName(serverInfoRepository.getOwnInfo().getPort()));
-            int generatedArticleId = repository.WriteArticleAndGenerateID(content);
+            int generatedArticleId = repository.WriteArticleAndGenerateID(content,parentId);
 
             System.out.println(generatedArticleId + " : " + content);
 
@@ -63,7 +63,7 @@ public class InterServerCommunication extends UnicastRemoteObject implements IIn
             while (index < allReplicaServers.size()) {
                 CallReplicaServerThread[] threads = new CallReplicaServerThread[numer_of_publisher_threads];
                 for (int i = 0; i < numer_of_publisher_threads && index < allReplicaServers.size(); i++) {
-                    threads[i] = new CallReplicaServerThread(allReplicaServers.get(index), generatedArticleId, content);
+                    threads[i] = new CallReplicaServerThread(allReplicaServers.get(index), generatedArticleId, content,parentId);
                     threads[i].start();
                     i++;
                     index++;

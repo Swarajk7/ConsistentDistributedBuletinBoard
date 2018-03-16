@@ -8,8 +8,8 @@ import java.util.List;
 
 public interface IClientServerCommunication extends Remote {
     Article readArticle(int id) throws RemoteException;
-    int postArticle(String content) throws RemoteException;
-    int reply(String content, int parentId) throws RemoteException;
+    Article[] readArticles(int id) throws RemoteException;
+    int postArticle(String content, int parentId) throws RemoteException;
     List<String> getListOfServers() throws RemoteException;
     List<Article> getListOfArticles() throws RemoteException;
 }

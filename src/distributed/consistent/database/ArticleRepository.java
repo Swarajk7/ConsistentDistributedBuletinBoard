@@ -1,6 +1,7 @@
 package distributed.consistent.database;
 
 import distributed.consistent.model.Article;
+import java.util.*;
 
 import java.sql.*;
 public class ArticleRepository {
@@ -46,6 +47,53 @@ public class ArticleRepository {
         return article;
     }
 
+    public Article[] ReadArticles(int id) throws SQLException, ClassNotFoundException {
+        Connection connection = this.getConnection();
+        Article[] articleArray = new Article[8];
+
+        Statement stmt = connection.createStatement();
+        for (int i = 0; i < 8; i++){
+            String sql = String.format("SELECT ID, Content From Article Where ID = %d", id+i);
+
+            ResultSet rs = stmt.executeQuery(sql);
+            //if no row is present return NULL to signal no data with this ID is present in the data.
+            Article article = null;
+            if (rs.isBeforeFirst()) {
+                article = new Article(rs.getInt("ID"), rs.getString("Content"));
+            }
+            articleArray[i] = article;
+
+        }
+
+        stmt.close();
+
+
+        connection.close();
+
+
+        return articleArray;
+    }
+
+    public HashMap<Integer,String> Readreplies(int id) throws SQLException, ClassNotFoundException {
+        Connection connection = this.getConnection();
+
+        HashMap<Integer,String> result=new HashMap<Integer,String>();
+        
+
+        Statement stmt = connection.createStatement();
+
+        String sql = String.format("SELECT ID, Content From Article Where ParentId = %d", id);
+
+        ResultSet rs = stmt.executeQuery(sql);
+
+        while (rs.next()) {
+            result.put(rs.getInt("ID"), rs.getString("Content"));
+        }
+        stmt.close();
+        connection.close();
+
+        return result;
+    }
     public void WriteArticle(int id, String content) throws SQLException, ClassNotFoundException {
         //returns -1 for replica which is not primary.
         //else it returns recently generated article id.
