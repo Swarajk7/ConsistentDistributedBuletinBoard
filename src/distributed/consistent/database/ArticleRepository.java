@@ -80,6 +80,24 @@ public class ArticleRepository {
         stmt.executeUpdate(sql);
     }
 
+    public int findMaxId()throws Exception {
+        Connection connection = this.getConnection();
+        connection.setAutoCommit(false);
+        Statement stmt = connection.createStatement();
+        int maxId = 0;
+        try{
+        String getMaxIdSql = "Select max(id) as ID from Article";
+        ResultSet rs = stmt.executeQuery(getMaxIdSql);
+        maxId = rs.getInt("ID");
+        } catch (Exception ex) {
+        ex.printStackTrace();
+        } finally {
+        stmt.close();
+        connection.close();
+        }
+        return maxId;
+    }
+
     public int WriteArticleAndGenerateID(String content, int parentReplyId, int parentArticleId) throws Exception {
         String parentArticleIDStr = parentArticleId == -1 ? "NULL" : Integer.toString(parentArticleId);
         String parentReplyIDStr = parentReplyId == -1 ? "NULL" : Integer.toString(parentReplyId);

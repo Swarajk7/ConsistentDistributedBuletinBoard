@@ -91,4 +91,36 @@ public class InterServerCommunication extends UnicastRemoteObject implements IIn
             throw new RemoteException(ex.getMessage());
         }
     }
+
+    public void InitiateQuorumReadAtMainServer(String rmi_registry_address, String rmi_binding_name,
+                                                int portnum, int id) throws RemoteException {
+
+        System.out.println(rmi_registry_address + ":" + portnum + "/" + rmi_binding_name + " -- " + id);
+
+        try{
+            ConfigManager configManager = ConfigManager.create();
+            int number_of_read_quorum_members = configManager.getIntegerValue(ConfigManager.QUORUM_READ_MEMBER_COUNT);
+            int max_id = 0;
+
+            for(int i = 0; i < number_of_read_quorum_members; i++){
+
+                try {
+                    ServerInfoRepository serverInfoRepository = ServerInfoRepository.create();
+                    if (serverInfoRepository.isLeader()) throw new RemoteException("Not supported for leader!");
+
+                    Utility utility = new Utility();
+                    ArticleRepository repository = new ArticleRepository(utility.getDatabaseName(serverInfoRepository.getOwnInfo().getPort()));
+                    int last_id = repository.findMaxId();
+
+                } catch (Exception ex) {
+                    throw new RemoteException(ex.getMessage());
+                }
+            }
+
+        }catch (Exception ex) {
+            ex.printStackTrace();
+            throw new RemoteException(ex.getMessage());
+        }
+
+    }
 }

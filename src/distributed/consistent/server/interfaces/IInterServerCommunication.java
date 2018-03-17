@@ -13,4 +13,7 @@ public interface IInterServerCommunication extends Remote {
                                          int portnum, String content, int parentReplyId, int parentArticleId) throws RemoteException;
 
     public void WriteArticleAtReplica(int id, String content, int parentReplyId, int parentArticleId) throws RemoteException;
+
+    void InitiateQuorumReadAtMainServer(String rmi_registry_address, String rmi_binding_name,
+                                               int portnum, int id) throws RemoteException;
 }

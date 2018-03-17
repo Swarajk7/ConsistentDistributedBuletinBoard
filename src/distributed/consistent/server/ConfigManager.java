@@ -25,6 +25,8 @@ public class ConfigManager {
     public static final String LEADER_PORT_NUMBER = "leaderportnumber";
     public static final String LEADER_IP_ADDRESS = "leaderipaddress";
     public static final String DATABASE_FILE_PATH = "databasefilepath";
+    public static final String QUORUM_READ_MEMBER_COUNT = "quorumreadmembercount";
+
 
     //fix below line for better lookup.. don't hardcode
     private static String filename = "/Users/jibinpt/Desktop/DS_2/ConsistentDistributedBuletinBoard/src/server_config.properties";

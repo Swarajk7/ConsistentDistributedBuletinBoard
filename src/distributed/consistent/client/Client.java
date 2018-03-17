@@ -19,7 +19,7 @@ public class Client {
     }
 
     public static void main(String args[]) {
-        String selectedIP = "10.0.0.210";
+        String selectedIP = "10.0.0.111";
         int port = 0;
         String bindingname = "pubsubclient";
         BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
