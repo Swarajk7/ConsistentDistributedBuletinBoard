@@ -58,7 +58,8 @@ public class Client {
                         int id = Integer.parseInt(reader.readLine());
                         List<Article> articleList = getRMIStub(selectedIP, port, bindingname).readArticle(id);
                         for (Article article : articleList) {
-                            System.out.println(article.getID() + " : " + article.getContent() + " " + article.getIndentCount());
+                            for (int i = 0; i < article.getIndentCount(); i++) System.out.print("  ");
+                            System.out.println(article.getID() + " : " + article.getContent());
                         }
                         selectedArticleId = id;
                         break;
@@ -76,7 +77,7 @@ public class Client {
                             Article[] articles = getRMIStub(selectedIP, port, bindingname).readArticles(displayId);
 
 
-                            for (int i = 0; i < articles.length; i++) {
+                             for (int i = 0; i < articles.length; i++) {
                                 if (articles[i] != null) {
                                     System.out.println(articles[i].getID() + " : " + articles[i].getContent());
                                 } else {
