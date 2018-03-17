@@ -37,11 +37,11 @@ public class ClientServerCommunication  extends UnicastRemoteObject implements I
     }
 
     @Override
-    public int postArticle(String content, int parentId) throws RemoteException {
+    public int postArticle(String content, int parentReplyId, int parentArticleId) throws RemoteException {
         System.out.println(content);
         try {
             IProtocol protocol = getProtocol();
-            protocol.RequestMainServerForWrite(content,parentId);
+            protocol.RequestMainServerForWrite(content, parentReplyId, parentArticleId);
         } catch (Exception e) {
             throw new RemoteException(e.getMessage());
         }

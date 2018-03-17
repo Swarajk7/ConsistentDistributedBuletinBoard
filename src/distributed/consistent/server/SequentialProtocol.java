@@ -31,12 +31,12 @@ public class SequentialProtocol implements IProtocol {
         return (IInterServerCommunication) Naming.lookup(serverEndPoint);
     }
 
-    public void RequestMainServerForWrite(String content, int parentId) throws Exception {
+    public void RequestMainServerForWrite(String content, int parentReplyId, int parentArticleId) throws Exception {
         ServerInfoRepository serverInfoRepository = ServerInfoRepository.create();
         // initiate write request at main server by calling InitiatePost method.
         // after this message main server will start propagating messages to other servers.
         getRMIStub().InitiatePostArticleAtMainServer(serverInfoRepository.getOwnInfo().getIp(), serverInfoRepository.getOwnInfo().getBindingname(),
-                serverInfoRepository.getOwnInfo().getPort(), content, parentId);
+                serverInfoRepository.getOwnInfo().getPort(), content, parentReplyId, parentArticleId);
     }
 
 

@@ -42,14 +42,14 @@ public class InterServerCommunication extends UnicastRemoteObject implements IIn
     }
 
     public void InitiatePostArticleAtMainServer(String rmi_registry_address, String rmi_binding_name,
-                                                int portnum, String content, int parentId) throws RemoteException {
+                                                int portnum, String content, int parentReplyId, int parentArticleId) throws RemoteException {
         System.out.println(rmi_registry_address + ":" + portnum + "/" + rmi_binding_name + " -- " + content);
         try {
             ServerInfoRepository serverInfoRepository = ServerInfoRepository.create();
             Utility utility = new Utility();
 
             ArticleRepository repository = new ArticleRepository(utility.getDatabaseName(serverInfoRepository.getOwnInfo().getPort()));
-            int generatedArticleId = repository.WriteArticleAndGenerateID(content,parentId);
+            int generatedArticleId = repository.WriteArticleAndGenerateID(content,parentReplyId,parentArticleId);
 
             System.out.println(generatedArticleId + " : " + content);
 
@@ -63,7 +63,7 @@ public class InterServerCommunication extends UnicastRemoteObject implements IIn
             while (index < allReplicaServers.size()) {
                 CallReplicaServerThread[] threads = new CallReplicaServerThread[numer_of_publisher_threads];
                 for (int i = 0; i < numer_of_publisher_threads && index < allReplicaServers.size(); i++) {
-                    threads[i] = new CallReplicaServerThread(allReplicaServers.get(index), generatedArticleId, content,parentId);
+                    threads[i] = new CallReplicaServerThread(allReplicaServers.get(index), generatedArticleId, content,parentReplyId,parentArticleId);
                     threads[i].start();
                     i++;
                     index++;
@@ -78,15 +78,15 @@ public class InterServerCommunication extends UnicastRemoteObject implements IIn
     }
 
     @Override
-    public void WriteArticleAtReplica(int id, String content, int parentid) throws RemoteException {
-        System.out.println(id + " -- " + content + " -- " + parentid);
+    public void WriteArticleAtReplica(int id, String content, int parentReplyId, int parentArticleId) throws RemoteException {
+        System.out.println(id + " -- " + content + " -- " + parentReplyId + " - " + parentArticleId);
         try {
             ServerInfoRepository serverInfoRepository = ServerInfoRepository.create();
             if (serverInfoRepository.isLeader()) throw new RemoteException("Not supported for leader!");
 
             Utility utility = new Utility();
             ArticleRepository repository = new ArticleRepository(utility.getDatabaseName(serverInfoRepository.getOwnInfo().getPort()));
-            repository.WriteArticle(id, content, parentid);
+            repository.WriteArticle(id, content, parentReplyId,parentArticleId);
         } catch (Exception ex) {
             throw new RemoteException(ex.getMessage());
         }

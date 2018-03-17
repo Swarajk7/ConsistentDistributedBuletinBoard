@@ -84,7 +84,7 @@ public class Server {
             Utility utility = new Utility();
             String dbpath = utility.getDatabaseName(serverInfoRepository.getOwnInfo().getPort());
             ArticleRepository articleRepository = new ArticleRepository(dbpath);
-            articleRepository.InitiateDatabase(serverInfoRepository.isLeader());
+            articleRepository.InitiateDatabase();
 
             // start rmiregistry
             registry = LocateRegistry.createRegistry(port);
