@@ -9,6 +9,7 @@ import distributed.consistent.server.interfaces.IProtocol;
 import java.io.IOException;
 import java.rmi.Naming;
 import java.sql.SQLException;
+import java.util.ArrayList;
 
 public class SequentialProtocol implements IProtocol {
     private ArticleRepository articleRepository;
@@ -43,7 +44,7 @@ public class SequentialProtocol implements IProtocol {
 
 
     @Override
-    public Article ReadArticle(int id) throws SQLException, ClassNotFoundException, IOException {
+    public ArrayList<Article> ReadArticle(int id) throws SQLException, ClassNotFoundException, IOException {
             ServerInfoRepository serverInfoRepository = ServerInfoRepository.create();
             Utility utility = new Utility();
 

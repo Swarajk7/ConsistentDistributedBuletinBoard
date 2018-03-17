@@ -28,7 +28,7 @@ public class ArticleRepository {
         connection.close();
     }
 
-    public Article ReadArticle(int id) throws SQLException, ClassNotFoundException {
+    public ArrayList<Article> ReadArticle(int id) throws SQLException, ClassNotFoundException {
         Connection connection = this.getConnection();
         String sql = String.format("SELECT ID, Content, ParentReplyID From Article Where ID = %d union select ID," +
                 " Content,ParentReplyID From Article Where ParentArticleID = %d ", id, id);
@@ -36,18 +36,21 @@ public class ArticleRepository {
         Statement stmt = connection.createStatement();
         ResultSet rs = stmt.executeQuery(sql);
         //if no row is present return NULL to signal no data with this ID is present in the data.
-
+        if(!rs.isBeforeFirst()) return null;
         //build graph and do shit here
 
-
-
-        Article article = null;
-        if (rs.isBeforeFirst()) {
-            article = new Article(rs.getInt("ID"), rs.getString("Content"));
+        Graph graph = new Graph();
+        while (rs.next()) {
+            int tid = rs.getInt("ID");
+            int tparentreplyid = rs.getInt("ParentReplyID");
+            String content = rs.getString("Content");
+            if (tid == id) tparentreplyid = -1;
+            graph.add_relation(tid, tparentreplyid, content);
         }
+        ArrayList<Article> articleList = graph.dfs(id);
         stmt.close();
         connection.close();
-        return article;
+        return articleList;
     }
 
     public Article[] ReadArticles(int id) throws SQLException, ClassNotFoundException {

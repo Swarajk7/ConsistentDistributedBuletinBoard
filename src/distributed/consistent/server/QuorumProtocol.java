@@ -9,6 +9,7 @@ import distributed.consistent.server.interfaces.IProtocol;
 import java.io.IOException;
 import java.rmi.Naming;
 import java.sql.SQLException;
+import java.util.ArrayList;
 
 public class QuorumProtocol implements IProtocol {
     private ArticleRepository articleRepository;
@@ -35,7 +36,7 @@ public class QuorumProtocol implements IProtocol {
 
 
     @Override
-    public Article ReadArticle(int id) throws SQLException, ClassNotFoundException, IOException {
+    public ArrayList<Article> ReadArticle(int id) throws SQLException, ClassNotFoundException, IOException {
         return null;
     }
 

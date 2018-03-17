@@ -8,6 +8,7 @@ import distributed.consistent.server.interfaces.IInterServerCommunication;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.rmi.Naming;
+import java.util.List;
 
 public class Client {
     private static IClientServerCommunication getRMIStub(String ip, int port, String bindingname) throws Exception {
@@ -22,6 +23,9 @@ public class Client {
         String selectedIP = "10.0.0.111";
         int port = 0;
         String bindingname = "pubsubclient";
+
+        int selectedArticleId = -1;
+
         BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
         while (true) {
             try {
@@ -52,9 +56,12 @@ public class Client {
                     case 3:
                         System.out.println("Article ID?\n");
                         int id = Integer.parseInt(reader.readLine());
-                        Article article = getRMIStub(selectedIP, port, bindingname).readArticle(id);
-                        System.out.println(article.getID() + " : " + article.getContent());
-
+                        List<Article> articleList = getRMIStub(selectedIP, port, bindingname).readArticle(id);
+                        for (Article article : articleList) {
+                            for (int i = 0; i < article.getIndentCount(); i++) System.out.print("  ");
+                            System.out.println(article.getID() + " : " + article.getContent());
+                        }
+                        selectedArticleId = id;
                         break;
                     case 4:
                         System.out.println("Article Content?\n");
@@ -70,7 +77,7 @@ public class Client {
                             Article[] articles = getRMIStub(selectedIP, port, bindingname).readArticles(displayId);
 
 
-                            for (int i = 0; i < articles.length; i++) {
+                             for (int i = 0; i < articles.length; i++) {
                                 if (articles[i] != null) {
                                     System.out.println(articles[i].getID() + " : " + articles[i].getContent());
                                 } else {
@@ -99,7 +106,8 @@ public class Client {
                         int articleNumber = Integer.parseInt(reader.readLine());
                         System.out.println("Please enter your reply\n");
                         String reply = reader.readLine();
-                        getRMIStub(selectedIP, port, bindingname).postArticle(reply, -1, articleNumber);
+                        if(selectedArticleId == -1) selectedArticleId = articleNumber;
+                        getRMIStub(selectedIP, port, bindingname).postArticle(reply, articleNumber, selectedArticleId);
                         break;
                     default:
                         break;

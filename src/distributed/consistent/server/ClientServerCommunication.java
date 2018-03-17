@@ -11,6 +11,7 @@ import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
 
 public class ClientServerCommunication  extends UnicastRemoteObject implements IClientServerCommunication {
@@ -19,7 +20,7 @@ public class ClientServerCommunication  extends UnicastRemoteObject implements I
     }
 
     @Override
-    public Article readArticle(int id) throws RemoteException {
+    public ArrayList<Article> readArticle(int id) throws RemoteException {
         try {
             return getProtocol().ReadArticle(id);
         } catch (Exception e) {
