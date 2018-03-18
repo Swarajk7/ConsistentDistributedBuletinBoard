@@ -2,6 +2,7 @@ package distributed.consistent.server;
 
 import distributed.consistent.Utility;
 import distributed.consistent.database.ArticleRepository;
+import distributed.consistent.model.ServerInfoWithMaxId;
 import distributed.consistent.server.interfaces.IInterServerCommunication;
 import distributed.consistent.server.threads.CallReplicaServerThread;
 
@@ -128,5 +129,10 @@ public class InterServerCommunication extends UnicastRemoteObject implements IIn
     public ArrayList<ServerInfo> getConnectedServers(){
         ServerInfoRepository serverInfoRepository = ServerInfoRepository.create();
         return serverInfoRepository.getConnectedServerList();
+    }
+
+    @Override
+    public void UpdateQuorumMembers(ArrayList<ServerInfoWithMaxId> serverInfoWithMaxIdArrayList) throws RemoteException {
+
     }
 }
