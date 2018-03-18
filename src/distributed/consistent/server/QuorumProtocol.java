@@ -47,10 +47,7 @@ public class QuorumProtocol implements IProtocol {
 
 
     public Article[] ReadArticlesfromQuorum(int id) throws SQLException, ClassNotFoundException, IOException {
-        ServerInfoRepository serverInfoRepository = ServerInfoRepository.create();
         Utility utility = new Utility();
-//        System.out.println("Ssadasdasdsadasd");
-
         try{
             ArrayList<ServerInfo> readQuorum = new  ArrayList<ServerInfo>();
             ConfigManager configManager = ConfigManager.create();
@@ -107,7 +104,9 @@ public class QuorumProtocol implements IProtocol {
 
     }
 
-
+    public void WriteArticlesToQuorum(int id) throws SQLException, ClassNotFoundException, IOException {
+        
+    }
     public void RequestMainServerForWrite(String content, int parentReplyId, int parentArticleId) throws Exception {
         ServerInfoRepository serverInfoRepository = ServerInfoRepository.create();
         // initiate write request at main server by calling InitiatePost method.
