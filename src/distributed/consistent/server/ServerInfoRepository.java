@@ -29,19 +29,24 @@ public class ServerInfoRepository {
                 configManager.getValue(ConfigManager.RMI_BINDING_NAME));
         this.isLeader = configManager.getValue(ConfigManager.LEADER_IP_ADDRESS).equals(ownInfo.getIp())
                 && (configManager.getIntegerValue(ConfigManager.LEADER_PORT_NUMBER) == ownInfo.getPort());
+
+        if(this.isLeader){
+            ServerInfo newServer = new ServerInfo(ip, port, ConfigManager.RMI_BINDING_NAME);
+            connectedServerList.add(newServer);
+        }
     }
 
-    public void addServerAddress(String ip, int port,String binidingName) throws Exception {
+    public void addServerAddress(String ip, int port,String bindingName) throws Exception {
         if(!hasRegistered) throw new Exception("Please register first by calling register()");
         if (!isLeader) throw new Exception("Only supported for Leader");
-        ServerInfo newServer = new ServerInfo(ip, port, binidingName);
+        ServerInfo newServer = new ServerInfo(ip, port, bindingName);
         connectedServerList.add(newServer);
     }
 
-    public void removeServerAddress(String ip, int port,String binidingName) throws Exception {
+    public void removeServerAddress(String ip, int port,String bindingName) throws Exception {
         if(!hasRegistered) throw new Exception("Please register first by calling register()");
         if (!isLeader) throw new Exception("Only supported for Leader");
-        ServerInfo newServer = new ServerInfo(ip, port, binidingName);
+        ServerInfo newServer = new ServerInfo(ip, port, bindingName);
         connectedServerList.remove(newServer);
     }
 

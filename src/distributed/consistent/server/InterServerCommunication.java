@@ -92,35 +92,41 @@ public class InterServerCommunication extends UnicastRemoteObject implements IIn
         }
     }
 
-    public void InitiateQuorumReadAtMainServer(String rmi_registry_address, String rmi_binding_name,
-                                                int portnum, int id) throws RemoteException {
 
-        System.out.println(rmi_registry_address + ":" + portnum + "/" + rmi_binding_name + " -- " + id);
-
+    public ServerInfo findQuorumLeader() throws RemoteException{
+        ServerInfoRepository serverInfoRepository = ServerInfoRepository.create();
+        Utility utility = new Utility();
+        ArrayList<ServerInfo> allReplicaServers = serverInfoRepository.getConnectedServerList();
+        int maxId = 0;
+        ServerInfo maxIdServerInfo =serverInfoRepository.getOwnInfo();
         try{
             ConfigManager configManager = ConfigManager.create();
-            int number_of_read_quorum_members = configManager.getIntegerValue(ConfigManager.QUORUM_READ_MEMBER_COUNT);
-            int max_id = 0;
+            int quorumReadMemberCount = configManager.getIntegerValue(ConfigManager.QUORUM_READ_MEMBER_COUNT);
 
-            for(int i = 0; i < number_of_read_quorum_members; i++){
+            //  If required number of read quorum members aren't there, then throw exception
+            if(allReplicaServers.size() < quorumReadMemberCount)
+                throw new RemoteException("Not enough Read Quorum Servers");
 
-                try {
-                    ServerInfoRepository serverInfoRepository = ServerInfoRepository.create();
-                    if (serverInfoRepository.isLeader()) throw new RemoteException("Not supported for leader!");
+            for(int i = 0;i < quorumReadMemberCount;i++){
+                ServerInfo  serverDetails=  allReplicaServers.get(i);
 
-                    Utility utility = new Utility();
-                    ArticleRepository repository = new ArticleRepository(utility.getDatabaseName(serverInfoRepository.getOwnInfo().getPort()));
-                    int last_id = repository.findMaxId();
-
-                } catch (Exception ex) {
-                    throw new RemoteException(ex.getMessage());
+                ArticleRepository repository = new ArticleRepository(utility.getDatabaseName(serverDetails.getPort()));
+                int currId = repository.findMaxId();
+                if(currId > maxId){
+                    maxId = currId;
+                    maxIdServerInfo = serverDetails;
                 }
             }
-
-        }catch (Exception ex) {
+        }catch(Exception ex) {
             ex.printStackTrace();
             throw new RemoteException(ex.getMessage());
         }
 
+        return maxIdServerInfo;
+    }
+
+    public ArrayList<ServerInfo> getConnectedServers(){
+        ServerInfoRepository serverInfoRepository = ServerInfoRepository.create();
+        return serverInfoRepository.getConnectedServerList();
     }
 }

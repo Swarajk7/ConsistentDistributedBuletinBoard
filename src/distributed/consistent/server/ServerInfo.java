@@ -1,14 +1,18 @@
 package distributed.consistent.server;
 
-public class ServerInfo {
+import java.io.Serializable;
+
+public class ServerInfo implements Serializable {
     private String ip;
     private int port;
     private String bindingname;
+    private Boolean isLocked;
 
     public ServerInfo(String ip, int port, String bindingname) {
         this.ip = ip;
         this.port = port;
         this.bindingname = bindingname;
+        this.isLocked = false;
     }
 
     public void setIp(String ip) {
@@ -25,6 +29,23 @@ public class ServerInfo {
 
     public void setPort(int port) {
         this.port = port;
+    }
+    public boolean lock() {
+        if(!this.isLocked){
+            this.isLocked = true;
+            return true;
+        }
+        else
+            return false;
+
+    }
+
+    public void unLock() {
+        this.isLocked = false;
+    }
+
+    public boolean getLockStatus(){
+        return this.isLocked;
     }
 
     public String getBindingname() {

@@ -40,16 +40,71 @@ public class QuorumProtocol implements IProtocol {
         return null;
     }
 
-
     @Override
     public Article[] ReadArticles(int id) throws SQLException, ClassNotFoundException, IOException {
+        return  ReadArticlesfromQuorum(id);
+    }
+
+
+    public Article[] ReadArticlesfromQuorum(int id) throws SQLException, ClassNotFoundException, IOException {
         ServerInfoRepository serverInfoRepository = ServerInfoRepository.create();
         Utility utility = new Utility();
+//        System.out.println("Ssadasdasdsadasd");
 
-        // Read article from own database using current article id.
-        // hoping that article would already have been propagated.
-        ArticleRepository repository = new ArticleRepository(utility.getDatabaseName(serverInfoRepository.getOwnInfo().getPort()));
-        return  repository.ReadArticles(id);
+        try{
+            ArrayList<ServerInfo> readQuorum = new  ArrayList<ServerInfo>();
+            ConfigManager configManager = ConfigManager.create();
+            int quorumReadMemberCount = configManager.getIntegerValue(ConfigManager.QUORUM_READ_MEMBER_COUNT);
+
+            ArrayList<ServerInfo> allReplicaServers = getJoinedServerListFromPrimary();
+            ServerInfo maxIdServerInfo = null;
+            int maxId = 0;
+
+            while(readQuorum.size() != quorumReadMemberCount){
+                ArrayList<ServerInfo> notChosenReplicas = new ArrayList<ServerInfo>();
+                for(int i = 0; i < allReplicaServers.size();i++){
+                    ServerInfo serverDetails =  allReplicaServers.get(i);
+                    if(serverDetails.lock()){
+                        readQuorum.add(serverDetails);
+                        ArticleRepository repository = new ArticleRepository(utility.getDatabaseName(serverDetails.getPort()));
+                        int currId = repository.findMaxId();
+                        if(currId > maxId){
+                            maxId = currId;
+                            maxIdServerInfo = serverDetails;
+                        }
+                        if(readQuorum.size() == quorumReadMemberCount){
+                            break;
+                        }
+                    }
+                    else{
+                        notChosenReplicas.add(serverDetails);
+                    }
+
+                }
+                allReplicaServers = notChosenReplicas;
+            }
+
+            System.out.println("Do quorum read from the following server");
+            System.out.println(maxIdServerInfo.getIp() + "  " + maxIdServerInfo.getPort() + " " + maxIdServerInfo.getLockStatus());
+
+            ArticleRepository repository = new ArticleRepository(utility.getDatabaseName(maxIdServerInfo.getPort()));
+
+
+            for(int i = 0; i < readQuorum.size();i++){
+                ServerInfo serverDetails =  readQuorum.get(i);
+
+                System.out.println(serverDetails.getIp() + "  " + serverDetails.getPort() + " " + serverDetails.getLockStatus());
+                serverDetails.unLock();
+            }
+
+            return  repository.ReadArticles(id);
+
+        }catch (Exception ex){
+            ex.printStackTrace();
+        }
+
+        return new Article[0];
+
     }
 
 
@@ -61,11 +116,18 @@ public class QuorumProtocol implements IProtocol {
                 serverInfoRepository.getOwnInfo().getPort(), content, parentReplyId, parentArticleId);
     }
 
-    public void RequestMainServerForReadQuorum(int id) throws Exception {
-        ServerInfoRepository serverInfoRepository = ServerInfoRepository.create();
+    public ServerInfo RequestMainServerForReadQuorumLeader(int id) throws Exception {
+
         // initiate write request at main server by calling InitiatePost method.
         // after this message main server will start propagating messages to other servers.
-        getRMIStub().InitiateQuorumReadAtMainServer(serverInfoRepository.getOwnInfo().getIp(), serverInfoRepository.getOwnInfo().getBindingname(),
-                serverInfoRepository.getOwnInfo().getPort(), id);
+        ServerInfo maxIdServerInfo = getRMIStub().findQuorumLeader();
+//        System.out.println("SDSDSDSDSDSDSD");
+        System.out.println(maxIdServerInfo.getPort());
+        return maxIdServerInfo;
+
+    }
+
+    public ArrayList<ServerInfo> getJoinedServerListFromPrimary() throws Exception{
+        return getRMIStub().getConnectedServers();
     }
 }

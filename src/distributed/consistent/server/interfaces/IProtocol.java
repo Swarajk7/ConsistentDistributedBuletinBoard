@@ -13,4 +13,5 @@ public interface IProtocol {
     ArrayList<Article> ReadArticle(int id) throws SQLException, ClassNotFoundException, IOException;
 
     Article[] ReadArticles(int id) throws SQLException, ClassNotFoundException, IOException;
+
 }

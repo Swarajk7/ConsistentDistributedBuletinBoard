@@ -39,19 +39,29 @@ public class Client {
                         System.out.println("Select a server to connect?");
                         System.out.println("1. 5005");
                         System.out.println("2. 5006");
+                        System.out.println("3. 5007");
                         int server = Integer.parseInt(reader.readLine());
                         if (server == 1) {
                             port = 5005;
-                        } else port = 5006;
+                        }
+                        else if(server == 2){
+                            port = 5006;
+                        }
+                        else port = 5007;
                         break;
                     case 2:
                         System.out.println("Select a server to connect?  ");
                         System.out.println("1. 5005");
                         System.out.println("2. 5006");
+                        System.out.println("3. 5007");
                         server = Integer.parseInt(reader.readLine());
                         if (server == 1) {
                             port = 5005;
-                        } else port = 5006;
+                        }
+                        else if(server == 2){
+                            port = 5006;
+                        }
+                        else port = 5007;
                         break;
                     case 3:
                         System.out.println("Article ID?\n");

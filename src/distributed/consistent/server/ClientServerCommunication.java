@@ -51,7 +51,7 @@ public class ClientServerCommunication  extends UnicastRemoteObject implements I
 
     private IProtocol getProtocol() throws IOException {
         //based on configuration create appropriate objects
-        return new SequentialProtocol();
+        return new QuorumProtocol();
     }
 
 
