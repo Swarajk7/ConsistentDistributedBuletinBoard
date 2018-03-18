@@ -1,5 +1,6 @@
 package distributed.consistent.server.interfaces;
 
+import distributed.consistent.model.Article;
 import distributed.consistent.model.ServerInfoWithMaxId;
 import distributed.consistent.server.ServerInfo;
 
@@ -24,4 +25,8 @@ public interface IInterServerCommunication extends Remote {
     ArrayList<ServerInfo> getConnectedServers() throws RemoteException;
 
     void UpdateQuorumMembers(ArrayList<ServerInfoWithMaxId> serverInfoWithMaxIdArrayList) throws RemoteException;
+
+    void InsertBulkForConsistency(ArrayList<Article> articleArrayList) throws RemoteException;
+
+    int findMaxId() throws RemoteException;
 }

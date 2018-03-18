@@ -136,10 +136,10 @@ public class ArticleRepository {
         return nextid;
     }
 
-    public List<Article> GetDeltaArticles(int minid) throws SQLException, ClassNotFoundException {
+    public ArrayList<Article> GetDeltaArticles(int minid) throws SQLException, ClassNotFoundException {
         // this will be called assuming server is upto date with most recent data.
         Connection connection = this.getConnection();
-        String sql = String.format("SELECT ID, Content, ParentReplyID, ParentArticleID From Article Where ID > %d ", minid);
+        String sql = String.format("SELECT ID, Content, ParentReplyID, ParentArticleID From Article Where ID > %d ORDER BY ID", minid);
         System.out.println(sql);
         Statement stmt = connection.createStatement();
         ArrayList<Article> articleList = null;
@@ -152,6 +152,8 @@ public class ArticleRepository {
                     int tid = rs.getInt("ID");
                     int tparentreplyid = rs.getInt("ParentReplyID");
                     int tparentarticleid = rs.getInt("ParentArticleID");
+                    if (tparentarticleid == 0) tparentarticleid = -1;
+                    if (tparentreplyid == 0) tparentreplyid = -1;
                     String content = rs.getString("Content");
                     Article article = new Article(tid, content, tparentreplyid, tparentarticleid);
                     articleList.add(article);
@@ -162,5 +164,13 @@ public class ArticleRepository {
             connection.close();
         }
         return articleList;
+    }
+
+    public void WriteArticles(ArrayList<Article> articleArrayList) throws SQLException, ClassNotFoundException {
+        for (Article article : articleArrayList) {
+            // As we are inserting sequentially it is okay if it fails after 2 insert.
+            // The process can reask for maximum id and start syncing again. :) Happy path and fault tolerant.
+            WriteArticle(article.getID(), article.getContent(), article.getParentreplyid(), article.getParentarticleid());
+        }
     }
 }

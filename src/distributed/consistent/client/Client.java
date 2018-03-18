@@ -20,7 +20,7 @@ public class Client {
     }
 
     public static void main(String args[]) {
-        String selectedIP = "10.0.0.111";
+        String selectedIP = "10.0.0.210";
         int port = 0;
         String bindingname = "pubsubclient";
 

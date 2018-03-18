@@ -11,17 +11,18 @@ public class Article implements Serializable{
     public Article(int id, String content) {
         this.id = id;
         this.content = content;
+        this.parentreplyid = -1;
+        this.parentarticleid = -1;
     }
 
     public Article(int id, String content,int indentCount) {
-        this.id = id;
-        this.content = content;
+        this(id, content);
         this.indentCount = indentCount;
     }
 
     public Article(int id, String content, int parentreplyid, int parentarticleid) {
         this(id, content);
-        this.parentarticleid = parentarticleid;
+        this.parentreplyid = parentreplyid;
         this.parentarticleid = parentarticleid;
     }
 
@@ -35,5 +36,13 @@ public class Article implements Serializable{
 
     public int getIndentCount() {
         return indentCount;
+    }
+
+    public int getParentreplyid() {
+        return parentreplyid;
+    }
+
+    public int getParentarticleid() {
+        return parentarticleid;
     }
 }

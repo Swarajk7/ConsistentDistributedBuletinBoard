@@ -136,26 +136,61 @@ public class InterServerCommunication extends UnicastRemoteObject implements IIn
 
     @Override
     public void UpdateQuorumMembers(ArrayList<ServerInfoWithMaxId> serverInfoWithMaxIdArrayList) throws RemoteException {
+        System.out.println("UpdateQuorumMembers(): Count -> " + serverInfoWithMaxIdArrayList.size());
         try {
-            // find minimum ids in the list
-            int minid = Integer.MAX_VALUE;
             Utility utility = new Utility();
-            for (ServerInfoWithMaxId serverInfoWithMaxId : serverInfoWithMaxIdArrayList) {
-                minid = Math.min(minid, serverInfoWithMaxId.getMaximum_id());
-            }
 
             ServerInfoRepository serverInfoRepository = ServerInfoRepository.create();
             ArticleRepository articleRepository = new ArticleRepository(utility.getDatabaseName(serverInfoRepository.getOwnInfo().getPort()));
 
-            List<Article> articlesToUpdate = articleRepository.GetDeltaArticles(minid);
             // Use these articles to update other servers in server
             for (ServerInfoWithMaxId serverInfoWithMaxId : serverInfoWithMaxIdArrayList) {
                 // call other server endpoint and pass articlesToUpdate list.
                 // select appropriate messages from the list to filter
+                // we can make below calls in parallel using multiple thread
+                ArrayList<Article> articlesToUpdate = articleRepository.GetDeltaArticles(serverInfoWithMaxId.getMaximum_id());
+                if (articlesToUpdate == null || articlesToUpdate.size() == 0) continue;
+                String serverEndPoint = "rmi://" + serverInfoWithMaxId.getServerInfo().getIp()
+                        + ":" + serverInfoWithMaxId.getServerInfo().getPort() + "/" +
+                        serverInfoWithMaxId.getServerInfo().getBindingname();
+                IInterServerCommunication stub = (IInterServerCommunication) Naming.lookup(serverEndPoint);
+                stub.InsertBulkForConsistency(articlesToUpdate);
             }
         } catch (Exception e) {
             e.printStackTrace();
             throw new RemoteException(e.getMessage());
         }
+    }
+
+    public void InsertBulkForConsistency(ArrayList<Article> articleArrayList) throws RemoteException {
+        System.out.println("InsertBulkForConsistency(): Count -> " + articleArrayList.size());
+        try {
+            Utility utility = new Utility();
+
+            ServerInfoRepository serverInfoRepository = ServerInfoRepository.create();
+            ArticleRepository articleRepository = new ArticleRepository(utility.getDatabaseName(serverInfoRepository.getOwnInfo().getPort()));
+
+            articleRepository.WriteArticles(articleArrayList);
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new RemoteException(e.getMessage());
+        }
+    }
+
+    @Override
+    public int findMaxId() throws RemoteException {
+        int maxid;
+        try {
+            Utility utility = new Utility();
+            ServerInfoRepository serverInfoRepository = ServerInfoRepository.create();
+            ArticleRepository articleRepository = new ArticleRepository(utility.getDatabaseName(serverInfoRepository.getOwnInfo().getPort()));
+
+            maxid = articleRepository.findMaxId();
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new RemoteException(e.getMessage());
+        }
+        System.out.println("Found Max Id = " + maxid);
+        return maxid;
     }
 }
