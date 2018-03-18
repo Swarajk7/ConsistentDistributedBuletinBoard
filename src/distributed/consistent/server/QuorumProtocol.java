@@ -3,11 +3,13 @@ package distributed.consistent.server;
 import distributed.consistent.Utility;
 import distributed.consistent.database.ArticleRepository;
 import distributed.consistent.model.Article;
+import distributed.consistent.model.ServerInfoWithMaxId;
 import distributed.consistent.server.interfaces.IInterServerCommunication;
 import distributed.consistent.server.interfaces.IProtocol;
 
 import java.io.IOException;
 import java.rmi.Naming;
+import java.rmi.RemoteException;
 import java.sql.SQLException;
 import java.util.ArrayList;
 
@@ -105,7 +107,70 @@ public class QuorumProtocol implements IProtocol {
     }
 
     public void WriteArticlesToQuorum(int id) throws SQLException, ClassNotFoundException, IOException {
+        Utility utility = new Utility();
+        try{
 
+            ConfigManager configManager = ConfigManager.create();
+            int quorumWriteMemberCount = configManager.getIntegerValue(ConfigManager.QUORUM_WRITE_MEMBER_COUNT);
+
+            if(quorumWriteMemberCount < 1){
+                throw new RemoteException("Write Quorum should have atleast 1 server");
+            }
+
+            ArrayList<ServerInfo> allReplicaServers = getJoinedServerListFromPrimary();
+            ServerInfoWithMaxId maxIdServerInfo = null;
+            int maxId = 0;
+
+            ArrayList<ServerInfoWithMaxId> writeQuorum = new ArrayList<ServerInfoWithMaxId>();
+
+            //  Stay in the while loop until  quorumWriteMemberCount servers are locked for write quorum
+            while(writeQuorum.size() != quorumWriteMemberCount){
+                ArrayList<ServerInfo> notChosenReplicas = new ArrayList<ServerInfo>();
+                for(int i = 0; i < allReplicaServers.size();i++){
+                    ServerInfo serverDetails =  allReplicaServers.get(i);
+                    if(serverDetails.lock()){
+                        //Will this work for DBs in another computer?
+                        ArticleRepository repository = new ArticleRepository(utility.getDatabaseName(serverDetails.getPort()));
+                        int currId = repository.findMaxId();
+                        ServerInfoWithMaxId serverMaxIdInfo = new ServerInfoWithMaxId(serverDetails.getIp(),
+                                serverDetails.getPort(),serverDetails.getBindingname(),currId);
+
+                        writeQuorum.add(serverMaxIdInfo);
+                        if(currId > maxId){
+                            maxIdServerInfo = serverMaxIdInfo;
+                        }
+
+                        if(writeQuorum.size() == quorumWriteMemberCount){
+                            break;
+                        }
+                    }
+                    else{
+                        notChosenReplicas.add(serverDetails);
+                    }
+
+                }
+                allReplicaServers = notChosenReplicas;
+            }
+
+            //Remove leader from writeQuorum list so that we have the
+            //list of servers to be updated
+            writeQuorum.remove(maxIdServerInfo);
+
+            //maxIdServerInfo, writeQuorum --> Your function input
+            //Call your function here
+
+            for(int i = 0; i < writeQuorum.size();i++){
+                ServerInfoWithMaxId serverMaxIdInfo =  writeQuorum.get(i);
+                System.out.println(serverMaxIdInfo.getServerInfo().getIp() + "  " + serverMaxIdInfo.getServerInfo().getPort()
+                        + " " + serverMaxIdInfo.getServerInfo().getLockStatus());
+                serverMaxIdInfo.getServerInfo().unLock();
+            }
+
+
+
+        }catch (Exception ex){
+            ex.printStackTrace();
+        }
     }
     public void RequestMainServerForWrite(String content, int parentReplyId, int parentArticleId) throws Exception {
         ServerInfoRepository serverInfoRepository = ServerInfoRepository.create();
