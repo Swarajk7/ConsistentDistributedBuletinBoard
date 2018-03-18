@@ -135,4 +135,32 @@ public class ArticleRepository {
         }
         return nextid;
     }
+
+    public List<Article> GetDeltaArticles(int minid) throws SQLException, ClassNotFoundException {
+        // this will be called assuming server is upto date with most recent data.
+        Connection connection = this.getConnection();
+        String sql = String.format("SELECT ID, Content, ParentReplyID, ParentArticleID From Article Where ID > %d ", minid);
+        System.out.println(sql);
+        Statement stmt = connection.createStatement();
+        ArrayList<Article> articleList = null;
+        try {
+            ResultSet rs = stmt.executeQuery(sql);
+            //if no row is present return NULL to signal no data with this ID is present in the data.
+            if (rs.isBeforeFirst()) {
+                articleList = new ArrayList<>();
+                while (rs.next()) {
+                    int tid = rs.getInt("ID");
+                    int tparentreplyid = rs.getInt("ParentReplyID");
+                    int tparentarticleid = rs.getInt("ParentArticleID");
+                    String content = rs.getString("Content");
+                    Article article = new Article(tid, content, tparentreplyid, tparentarticleid);
+                    articleList.add(article);
+                }
+            }
+        } finally {
+            stmt.close();
+            connection.close();
+        }
+        return articleList;
+    }
 }

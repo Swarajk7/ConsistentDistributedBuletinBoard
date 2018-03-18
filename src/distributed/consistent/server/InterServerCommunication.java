@@ -2,10 +2,12 @@ package distributed.consistent.server;
 
 import distributed.consistent.Utility;
 import distributed.consistent.database.ArticleRepository;
+import distributed.consistent.model.Article;
 import distributed.consistent.model.ServerInfoWithMaxId;
 import distributed.consistent.server.interfaces.IInterServerCommunication;
 import distributed.consistent.server.threads.CallReplicaServerThread;
 
+import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
@@ -14,6 +16,7 @@ import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 
 public class InterServerCommunication extends UnicastRemoteObject implements IInterServerCommunication {
     InterServerCommunication() throws RemoteException {
@@ -50,7 +53,7 @@ public class InterServerCommunication extends UnicastRemoteObject implements IIn
             Utility utility = new Utility();
 
             ArticleRepository repository = new ArticleRepository(utility.getDatabaseName(serverInfoRepository.getOwnInfo().getPort()));
-            int generatedArticleId = repository.WriteArticleAndGenerateID(content,parentReplyId,parentArticleId);
+            int generatedArticleId = repository.WriteArticleAndGenerateID(content, parentReplyId, parentArticleId);
 
             System.out.println(generatedArticleId + " : " + content);
 
@@ -64,7 +67,7 @@ public class InterServerCommunication extends UnicastRemoteObject implements IIn
             while (index < allReplicaServers.size()) {
                 CallReplicaServerThread[] threads = new CallReplicaServerThread[numer_of_publisher_threads];
                 for (int i = 0; i < numer_of_publisher_threads && index < allReplicaServers.size(); i++) {
-                    threads[i] = new CallReplicaServerThread(allReplicaServers.get(index), generatedArticleId, content,parentReplyId,parentArticleId);
+                    threads[i] = new CallReplicaServerThread(allReplicaServers.get(index), generatedArticleId, content, parentReplyId, parentArticleId);
                     threads[i].start();
                     i++;
                     index++;
@@ -87,38 +90,38 @@ public class InterServerCommunication extends UnicastRemoteObject implements IIn
 
             Utility utility = new Utility();
             ArticleRepository repository = new ArticleRepository(utility.getDatabaseName(serverInfoRepository.getOwnInfo().getPort()));
-            repository.WriteArticle(id, content, parentReplyId,parentArticleId);
+            repository.WriteArticle(id, content, parentReplyId, parentArticleId);
         } catch (Exception ex) {
             throw new RemoteException(ex.getMessage());
         }
     }
 
 
-    public ServerInfo findQuorumLeader() throws RemoteException{
+    public ServerInfo findQuorumLeader() throws RemoteException {
         ServerInfoRepository serverInfoRepository = ServerInfoRepository.create();
         Utility utility = new Utility();
         ArrayList<ServerInfo> allReplicaServers = serverInfoRepository.getConnectedServerList();
         int maxId = 0;
-        ServerInfo maxIdServerInfo =serverInfoRepository.getOwnInfo();
-        try{
+        ServerInfo maxIdServerInfo = serverInfoRepository.getOwnInfo();
+        try {
             ConfigManager configManager = ConfigManager.create();
             int quorumReadMemberCount = configManager.getIntegerValue(ConfigManager.QUORUM_READ_MEMBER_COUNT);
 
             //  If required number of read quorum members aren't there, then throw exception
-            if(allReplicaServers.size() < quorumReadMemberCount)
+            if (allReplicaServers.size() < quorumReadMemberCount)
                 throw new RemoteException("Not enough Read Quorum Servers");
 
-            for(int i = 0;i < quorumReadMemberCount;i++){
-                ServerInfo  serverDetails=  allReplicaServers.get(i);
+            for (int i = 0; i < quorumReadMemberCount; i++) {
+                ServerInfo serverDetails = allReplicaServers.get(i);
 
                 ArticleRepository repository = new ArticleRepository(utility.getDatabaseName(serverDetails.getPort()));
                 int currId = repository.findMaxId();
-                if(currId > maxId){
+                if (currId > maxId) {
                     maxId = currId;
                     maxIdServerInfo = serverDetails;
                 }
             }
-        }catch(Exception ex) {
+        } catch (Exception ex) {
             ex.printStackTrace();
             throw new RemoteException(ex.getMessage());
         }
@@ -126,13 +129,33 @@ public class InterServerCommunication extends UnicastRemoteObject implements IIn
         return maxIdServerInfo;
     }
 
-    public ArrayList<ServerInfo> getConnectedServers(){
+    public ArrayList<ServerInfo> getConnectedServers() {
         ServerInfoRepository serverInfoRepository = ServerInfoRepository.create();
         return serverInfoRepository.getConnectedServerList();
     }
 
     @Override
     public void UpdateQuorumMembers(ArrayList<ServerInfoWithMaxId> serverInfoWithMaxIdArrayList) throws RemoteException {
+        try {
+            // find minimum ids in the list
+            int minid = Integer.MAX_VALUE;
+            Utility utility = new Utility();
+            for (ServerInfoWithMaxId serverInfoWithMaxId : serverInfoWithMaxIdArrayList) {
+                minid = Math.min(minid, serverInfoWithMaxId.getMaximum_id());
+            }
 
+            ServerInfoRepository serverInfoRepository = ServerInfoRepository.create();
+            ArticleRepository articleRepository = new ArticleRepository(utility.getDatabaseName(serverInfoRepository.getOwnInfo().getPort()));
+
+            List<Article> articlesToUpdate = articleRepository.GetDeltaArticles(minid);
+            // Use these articles to update other servers in server
+            for (ServerInfoWithMaxId serverInfoWithMaxId : serverInfoWithMaxIdArrayList) {
+                // call other server endpoint and pass articlesToUpdate list.
+                // select appropriate messages from the list to filter
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new RemoteException(e.getMessage());
+        }
     }
 }

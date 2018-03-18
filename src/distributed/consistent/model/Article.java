@@ -6,6 +6,7 @@ public class Article implements Serializable{
     private int id;
     private String content;
     private int indentCount = 0;
+    private int parentreplyid,parentarticleid;
 
     public Article(int id, String content) {
         this.id = id;
@@ -16,6 +17,12 @@ public class Article implements Serializable{
         this.id = id;
         this.content = content;
         this.indentCount = indentCount;
+    }
+
+    public Article(int id, String content, int parentreplyid, int parentarticleid) {
+        this(id, content);
+        this.parentarticleid = parentarticleid;
+        this.parentarticleid = parentarticleid;
     }
 
     public int getID() {
