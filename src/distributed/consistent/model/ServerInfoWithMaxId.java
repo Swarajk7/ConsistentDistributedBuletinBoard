@@ -16,4 +16,8 @@ public class ServerInfoWithMaxId implements Serializable {
     public ServerInfo getServerInfo(){
         return this.serverInfo;
     }
+
+    public int getMaximum_id() {
+        return maximum_id;
+    }
 }
