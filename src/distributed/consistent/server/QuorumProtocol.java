@@ -105,7 +105,7 @@ public class QuorumProtocol implements IProtocol {
     }
 
     public void WriteArticlesToQuorum(int id) throws SQLException, ClassNotFoundException, IOException {
-        
+
     }
     public void RequestMainServerForWrite(String content, int parentReplyId, int parentArticleId) throws Exception {
         ServerInfoRepository serverInfoRepository = ServerInfoRepository.create();
