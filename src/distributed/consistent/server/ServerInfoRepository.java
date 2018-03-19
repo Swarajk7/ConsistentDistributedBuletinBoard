@@ -30,8 +30,8 @@ public class ServerInfoRepository {
         this.isLeader = configManager.getValue(ConfigManager.LEADER_IP_ADDRESS).equals(ownInfo.getIp())
                 && (configManager.getIntegerValue(ConfigManager.LEADER_PORT_NUMBER) == ownInfo.getPort());
 
-        if(this.isLeader){
-            ServerInfo newServer = new ServerInfo(ip, port, ConfigManager.RMI_BINDING_NAME);
+        if (this.isLeader) {
+            ServerInfo newServer = new ServerInfo(ip, port, configManager.getValue(ConfigManager.RMI_BINDING_NAME));
             connectedServerList.add(newServer);
         }
     }

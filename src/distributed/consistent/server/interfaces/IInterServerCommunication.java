@@ -29,4 +29,6 @@ public interface IInterServerCommunication extends Remote {
     void InsertBulkForConsistency(ArrayList<Article> articleArrayList) throws RemoteException;
 
     int findMaxId() throws RemoteException;
+
+    void WriteArticleAtQuorumLeader(String content, int parentReplyId, int parentArticleId)throws RemoteException;
 }

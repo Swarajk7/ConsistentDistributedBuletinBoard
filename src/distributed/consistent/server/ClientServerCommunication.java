@@ -51,10 +51,19 @@ public class ClientServerCommunication  extends UnicastRemoteObject implements I
 
     private IProtocol getProtocol() throws IOException {
         //based on configuration create appropriate objects
-        return new SequentialProtocol();
-        //return new QuorumProtocol();
+//        return new SequentialProtocol();
+        return new QuorumProtocol();
     }
 
+
+    public void releaseLocks() throws RemoteException {
+        try {
+            IProtocol protocol = getProtocol();
+            protocol.releaseLocks();
+        } catch (Exception e) {
+            throw new RemoteException(e.getMessage());
+        }
+    }
 
 
     @Override

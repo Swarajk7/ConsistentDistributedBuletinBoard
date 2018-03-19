@@ -6,7 +6,7 @@ public class ServerInfo implements Serializable {
     private String ip;
     private int port;
     private String bindingname;
-    private static Boolean isLocked;
+    private  Boolean isLocked;
 
     public ServerInfo(String ip, int port, String bindingname) {
         this.ip = ip;
@@ -30,9 +30,9 @@ public class ServerInfo implements Serializable {
     public void setPort(int port) {
         this.port = port;
     }
-    public static synchronized boolean lock() {
-        if(!isLocked){
-            isLocked = true;
+    public synchronized boolean lock() {
+        if(!this.isLocked){
+            this.isLocked = true;
             return true;
         }
         else

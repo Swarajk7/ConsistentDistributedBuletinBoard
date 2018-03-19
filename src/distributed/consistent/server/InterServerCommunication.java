@@ -82,6 +82,22 @@ public class InterServerCommunication extends UnicastRemoteObject implements IIn
     }
 
     @Override
+    public void WriteArticleAtQuorumLeader(String content, int parentReplyId, int parentArticleId)throws RemoteException {
+        try {
+            ServerInfoRepository serverInfoRepository = ServerInfoRepository.create();
+            Utility utility = new Utility();
+
+            ArticleRepository repository = new ArticleRepository(utility.getDatabaseName(serverInfoRepository.getOwnInfo().getPort()));
+            int generatedArticleId = repository.WriteArticleAndGenerateID(content, parentReplyId, parentArticleId);
+
+            System.out.println(generatedArticleId + " : " + content);
+        }catch(Exception ex){
+            ex.printStackTrace();
+            throw new RemoteException(ex.getMessage());
+        }
+    }
+
+    @Override
     public void WriteArticleAtReplica(int id, String content, int parentReplyId, int parentArticleId) throws RemoteException {
         System.out.println(id + " -- " + content + " -- " + parentReplyId + " - " + parentArticleId);
         try {

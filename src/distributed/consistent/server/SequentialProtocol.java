@@ -64,4 +64,8 @@ public class SequentialProtocol implements IProtocol {
         ArticleRepository repository = new ArticleRepository(utility.getDatabaseName(serverInfoRepository.getOwnInfo().getPort()));
         return  repository.ReadArticles(id);
     }
+
+    public void releaseLocks() throws Exception {
+
+    }
 }

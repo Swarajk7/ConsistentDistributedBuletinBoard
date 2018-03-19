@@ -24,6 +24,15 @@ public class QuorumProtocol implements IProtocol {
         articleRepository = new ArticleRepository(dbpath);
     }
 
+    public void releaseLocks() throws Exception {
+        ArrayList<ServerInfo> allReplicaServers = getJoinedServerListFromPrimary();
+        for(int i = 0; i < allReplicaServers.size();i++){
+            ServerInfo serverDetails =  allReplicaServers.get(i);
+            serverDetails.unLock();
+        }
+    }
+
+    //Gets stub of the primary server
     private IInterServerCommunication getRMIStub() throws Exception {
         ConfigManager clientManager = ConfigManager.create();
 
@@ -34,6 +43,15 @@ public class QuorumProtocol implements IProtocol {
         return (IInterServerCommunication) Naming.lookup(serverEndPoint);
     }
 
+
+    private IInterServerCommunication getQuorumLeaderRMIStub(ServerInfo maxIdServerInfo) throws Exception {
+        // get stub for calling InterServer RMI functions.
+        String serverEndPoint = "rmi://" + maxIdServerInfo.getIp()
+                + ":" + maxIdServerInfo.getPort() + "/" +
+                maxIdServerInfo.getBindingname();
+        System.out.println(serverEndPoint);
+        return (IInterServerCommunication) Naming.lookup(serverEndPoint);
+    }
 
 
 
@@ -60,9 +78,11 @@ public class QuorumProtocol implements IProtocol {
             int maxId = 0;
 
             while(readQuorum.size() != quorumReadMemberCount){
+                System.out.println("Started locking quorum members for read");
                 ArrayList<ServerInfo> notChosenReplicas = new ArrayList<ServerInfo>();
                 for(int i = 0; i < allReplicaServers.size();i++){
                     ServerInfo serverDetails =  allReplicaServers.get(i);
+                    System.out.println(serverDetails.getLockStatus() + " " + serverDetails.getPort());
                     if(serverDetails.lock()){
                         readQuorum.add(serverDetails);
                         ArticleRepository repository = new ArticleRepository(utility.getDatabaseName(serverDetails.getPort()));
@@ -106,7 +126,7 @@ public class QuorumProtocol implements IProtocol {
 
     }
 
-    public void WriteArticlesToQuorum(int id) throws SQLException, ClassNotFoundException, IOException {
+    public void WriteArticlesToQuorum(String content, int parentReplyId, int parentArticleId) throws SQLException, ClassNotFoundException, IOException {
         Utility utility = new Utility();
         try{
 
@@ -156,9 +176,18 @@ public class QuorumProtocol implements IProtocol {
             //list of servers to be updated
             writeQuorum.remove(maxIdServerInfo);
 
-            //maxIdServerInfo, writeQuorum --> Your function input
-            //Call your function here
+            //Get Quorum Leader stub
+            IInterServerCommunication quorumLeaderStub = getQuorumLeaderRMIStub(maxIdServerInfo.getServerInfo());
+            //Insert new values in quorum leader server.
+            //Assumption: System is faul tolerant. In case the system isn't fault tolerant
+            //we should first make all the the quorum members consistent and then push in the update
+            quorumLeaderStub.WriteArticleAtQuorumLeader(content, parentReplyId, parentArticleId);
+            //Update other quorum members
+            quorumLeaderStub.UpdateQuorumMembers(writeQuorum);
+            //Release lock on quorum leader
+            maxIdServerInfo.getServerInfo().unLock();
 
+            //Release lock on other quorum members
             for(int i = 0; i < writeQuorum.size();i++){
                 ServerInfoWithMaxId serverMaxIdInfo =  writeQuorum.get(i);
                 System.out.println(serverMaxIdInfo.getServerInfo().getIp() + "  " + serverMaxIdInfo.getServerInfo().getPort()
@@ -173,23 +202,19 @@ public class QuorumProtocol implements IProtocol {
         }
     }
     public void RequestMainServerForWrite(String content, int parentReplyId, int parentArticleId) throws Exception {
-        ServerInfoRepository serverInfoRepository = ServerInfoRepository.create();
-        // initiate write request at main server by calling InitiatePost method.
-        // after this message main server will start propagating messages to other servers.
-        getRMIStub().InitiatePostArticleAtMainServer(serverInfoRepository.getOwnInfo().getIp(), serverInfoRepository.getOwnInfo().getBindingname(),
-                serverInfoRepository.getOwnInfo().getPort(), content, parentReplyId, parentArticleId);
+        WriteArticlesToQuorum(content, parentReplyId,parentArticleId);
     }
 
-    public ServerInfo RequestMainServerForReadQuorumLeader(int id) throws Exception {
+//    public ServerInfo RequestMainServerForReadQuorumLeader(int id) throws Exception {
+//
+//        // initiate write request at main server by calling InitiatePost method.
+//        // after this message main server will start propagating messages to other servers.
+//        ServerInfo maxIdServerInfo = getRMIStub().findQuorumLeader();
+////        System.out.println("SDSDSDSDSDSDSD");
+//        System.out.println(maxIdServerInfo.getPort());
+//        return maxIdServerInfo;
 
-        // initiate write request at main server by calling InitiatePost method.
-        // after this message main server will start propagating messages to other servers.
-        ServerInfo maxIdServerInfo = getRMIStub().findQuorumLeader();
-//        System.out.println("SDSDSDSDSDSDSD");
-        System.out.println(maxIdServerInfo.getPort());
-        return maxIdServerInfo;
-
-    }
+//    }
 
     public ArrayList<ServerInfo> getJoinedServerListFromPrimary() throws Exception{
         return getRMIStub().getConnectedServers();

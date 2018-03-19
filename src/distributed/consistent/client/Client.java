@@ -20,7 +20,7 @@ public class Client {
     }
 
     public static void main(String args[]) {
-        String selectedIP = "10.0.0.210";
+        String selectedIP = "10.0.0.111";
         int port = 0;
         String bindingname = "pubsubclient";
 
@@ -31,7 +31,7 @@ public class Client {
             try {
                 System.out.println("Choose an Option? \n1. JOIN A SERVER\n" +
                         "2. CHANGE SERVER \n3. Read An Article \n4. Post An Article\n5. Display Articles\n6. Reply to " +
-                        "Article\n");
+                        "Article\n7 .Release Locks");
                 int readValue = Integer.parseInt(reader.readLine());
                 switch (readValue) {
                     case 1:
@@ -118,6 +118,9 @@ public class Client {
                         String reply = reader.readLine();
                         if (selectedArticleId == -1) selectedArticleId = articleNumber;
                         getRMIStub(selectedIP, port, bindingname).postArticle(reply, articleNumber, selectedArticleId);
+                        break;
+                    case 7:
+                        getRMIStub(selectedIP, port, bindingname).releaseLocks();
                         break;
                     default:
                         break;
