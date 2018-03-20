@@ -10,17 +10,8 @@ Singleton class for handling server side config read and write.
 ConfigurationManger is also readonly and hence won't cause any conflicts or concurrency issue.
  */
 public class ConfigManager {
-    public static final String RMI_REGISTRY_ADDRESS = "rmiregistryaddress";
-    public static final String UDP_SERVER_PORT = "port";
-    public static final String REGISTRY_SERVER_ADDRESS = "registryserveraddress";
-    public static final String REGISTRY_SERVER_PORT = "registryserverport";
-    public static final String UDP_SERVER_PORT2 = "updserverport2";
-    public static final String RMI_PORT_NUMBER="rmiportnumber";
     public static final String RMI_BINDING_NAME="rmibindingname";
-    public static final String SOCKET_TIMEOUT = "sockettimeout";
     public static final String NUMBER_OF_PUBLISH_THREADS = "numerofpublisherthreads";
-    public static final String IS_DEBUG = "isdebug";
-    public static final String MAX_CLIENT_COUNT = "maxclientcount";
     public static final String LEADER_BINDING_NAME = "leaderbindingname";
     public static final String LEADER_PORT_NUMBER = "leaderportnumber";
     public static final String LEADER_IP_ADDRESS = "leaderipaddress";
@@ -31,7 +22,7 @@ public class ConfigManager {
 
 
     //fix below line for better lookup.. don't hardcode
-    private static String filename = "C:\\Users\\sk111\\IdeaProjects\\ConsistentDistributedBuletinBoard\\src\\server_config.properties";
+    private static String filename = "/Users/jibinpt/Desktop/DS_2/ConsistentDistributedBuletinBoard/src/server_config.properties";
     private Properties prop;
     private static ConfigManager obj = null;
 

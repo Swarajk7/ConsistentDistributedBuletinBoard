@@ -313,4 +313,14 @@ public class QuorumProtocol implements IProtocol {
     public ArrayList<ServerInfo> getJoinedServerListFromPrimary() throws Exception{
         return getPrimaryRMIStub().getConnectedServers();
     }
+
+    @Override
+    public ArrayList<Article> ReadArticle(int id, int maxidseentilltime) throws Exception{
+        return ReadArticle(id);
+    }
+
+    @Override
+    public Article[] ReadArticles(int id,int maxidseentilltime) throws Exception{
+        return ReadArticles(id);
+    }
 }
