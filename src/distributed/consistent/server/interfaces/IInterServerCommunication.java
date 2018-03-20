@@ -1,5 +1,6 @@
 package distributed.consistent.server.interfaces;
 
+import distributed.consistent.database.ArticleRepository;
 import distributed.consistent.model.Article;
 import distributed.consistent.model.ServerInfoWithMaxId;
 import distributed.consistent.server.ServerInfo;
@@ -33,4 +34,13 @@ public interface IInterServerCommunication extends Remote {
     void WriteArticleAtQuorumLeader(String content, int parentReplyId, int parentArticleId) throws RemoteException;
 
     ArrayList<Article> GetDeltaArticles(int maxidindatabase) throws RemoteException;
+
+    boolean lock()throws Exception;
+
+    void unLock() throws Exception;
+
+    boolean getLockStatus()throws Exception;
+
+    ArticleRepository getRepository(int port) throws Exception;
+
 }
