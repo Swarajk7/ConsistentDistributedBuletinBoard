@@ -4,6 +4,7 @@ import distributed.consistent.Utility;
 import distributed.consistent.database.ArticleRepository;
 import distributed.consistent.server.interfaces.IClientServerCommunication;
 import distributed.consistent.server.interfaces.IInterServerCommunication;
+import distributed.consistent.server.threads.ServerInfoReceiverThread;
 
 import java.io.IOException;
 import java.net.*;
@@ -98,6 +99,8 @@ public class Server {
             Naming.rebind(getRMIEndpoint(ip, port,
                     ConfigManager.create().getValue(ConfigManager.RMI_BINDING_NAME) + "client"),
                     stub2);
+
+            new ServerInfoReceiverThread();
         } catch (Exception ex) {
             ex.printStackTrace();
         }

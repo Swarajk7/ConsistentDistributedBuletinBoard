@@ -252,7 +252,8 @@ public class QuorumProtocol implements IProtocol {
 
 //    }
 
-    public ArrayList<ServerInfo> getJoinedServerListFromPrimary() throws Exception{
+    public ArrayList<ServerInfo> getJoinedServerListFromPrimary() throws Exception {
         return getPrimaryRMIStub().getConnectedServers();
+    }
 
 }

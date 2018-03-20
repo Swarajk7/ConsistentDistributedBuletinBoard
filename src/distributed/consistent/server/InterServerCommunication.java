@@ -112,12 +112,44 @@ public class InterServerCommunication extends UnicastRemoteObject implements IIn
     public ArticleRepository getRepository(int port) throws Exception{
         try{
             Utility utility = new Utility();
-            ArticleRepository repository = new ArticleRepository(utility.getDatabaseName(port));
-            return repository;
+            return new ArticleRepository(utility.getDatabaseName(port));
         } catch (Exception ex) {
             throw new RemoteException(ex.getMessage());
         }
 
+    }
+
+    @Override
+    public boolean ChangeLeaderMulticast(ServerInfo info, int maxidatnewleader) throws Exception {
+        // update your own leaderinfo and multicast
+        ServerInfoRepository serverInfoRepository = ServerInfoRepository.create();
+        if (serverInfoRepository.getLockStatus()) return false;
+        try {
+            serverInfoRepository.lock();
+            serverInfoRepository.setIsLeader(false);
+            ConfigManager configManager = ConfigManager.create();
+            String serverEndPoint = "rmi://" + configManager.getValue(ConfigManager.LEADER_IP_ADDRESS)
+                    + ":" + configManager.getValue(ConfigManager.LEADER_PORT_NUMBER) + "/" +
+                    configManager.getValue(ConfigManager.LEADER_BINDING_NAME);
+            IInterServerCommunication stub = (IInterServerCommunication) Naming.lookup(serverEndPoint);
+            ArrayList<ServerInfo> connectedServers = stub.getConnectedServers();
+            for(ServerInfo serverInfo: connectedServers) {
+                MultiCastHelper multiCastHelper = new MultiCastHelper();
+                multiCastHelper.send(serverInfo);
+            }
+            serverEndPoint = "rmi://" + info.getIp()
+                    + ":" + info.getPort() + "/" +
+                    info.getBindingname();
+            stub = (IInterServerCommunication) Naming.lookup(serverEndPoint);
+            ArticleRepository articleRepository = new ArticleRepository(new Utility().
+                    getDatabaseName(serverInfoRepository.getOwnInfo().getPort()));
+            ArrayList<Article> articlesToUpdate = articleRepository.GetDeltaArticles(maxidatnewleader);
+            stub.InsertBulkForConsistency(articlesToUpdate);
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            serverInfoRepository.unLock();
+        }
+        return true;
     }
 
 
@@ -148,7 +180,7 @@ public class InterServerCommunication extends UnicastRemoteObject implements IIn
 
     @Override
     public ArrayList<Article> GetDeltaArticles(int maxidindatabase) throws RemoteException {
-        ArrayList<Article> articlesToUpdate = null;
+        ArrayList<Article> articlesToUpdate;
         try {
             Utility utility = new Utility();
             ServerInfoRepository serverInfoRepository = ServerInfoRepository.create();
@@ -244,7 +276,7 @@ public class InterServerCommunication extends UnicastRemoteObject implements IIn
     }
 
     public void InsertBulkForConsistency(ArrayList<Article> articleArrayList) throws RemoteException {
-        System.out.println("InsertBulkForConsistency(): Count -> " + articleArrayList.size());
+        System.out.println("InsertBulkForConsistency()");
         try {
             Utility utility = new Utility();
 

@@ -43,4 +43,6 @@ public interface IInterServerCommunication extends Remote {
 
     ArticleRepository getRepository(int port) throws Exception;
 
+    boolean ChangeLeaderMulticast(ServerInfo serverInfo, int maxidatnewleader) throws Exception;
+
 }

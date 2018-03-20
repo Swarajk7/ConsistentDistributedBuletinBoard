@@ -17,7 +17,22 @@ import java.util.ArrayList;
 public class ReadYourWriteProtocol implements IProtocol {
     @Override
     public void RequestMainServerForWrite(String content, int parentReplyId, int parentArticleId) throws Exception {
-
+        ServerInfoRepository serverInfoRepository = ServerInfoRepository.create();
+        ArticleRepository repository = new ArticleRepository(new Utility().getDatabaseName(serverInfoRepository.getOwnInfo().getPort()));
+        if (!serverInfoRepository.isLeader()) {
+            IInterServerCommunication stub = getRMIStubFromServerInfo(serverInfoRepository.getLeaderInfo());
+            boolean success = false;
+            while (!success) {
+                // if current leader is not the leader, it will be fixed during multicasting by last leader.
+                // wait for few secs
+                success = stub.ChangeLeaderMulticast(serverInfoRepository.getOwnInfo(),
+                        repository.findMaxId());
+                Thread.sleep(500);
+            }
+            serverInfoRepository.setLeaderInfo(serverInfoRepository.getOwnInfo());
+            serverInfoRepository.setIsLeader(true);
+        }
+        repository.WriteArticleAndGenerateID(content, parentReplyId, parentArticleId);
     }
 
     @Override
@@ -57,6 +72,7 @@ public class ReadYourWriteProtocol implements IProtocol {
 
     private void UpdateServerWithRecentDataIfOutOfSync(int maxidseentilltime) throws Exception {
         ServerInfoRepository serverInfoRepository = ServerInfoRepository.create();
+        if(serverInfoRepository.isLeader()) return;
         Utility utility = new Utility();
         ArticleRepository repository = new ArticleRepository(utility.getDatabaseName(serverInfoRepository.getOwnInfo().getPort()));
         // find maximum id from the database
