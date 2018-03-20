@@ -1,10 +1,12 @@
 package distributed.consistent.database;
 
 import distributed.consistent.model.Article;
+
+import java.io.Serializable;
 import java.util.*;
 
 import java.sql.*;
-public class ArticleRepository {
+public class ArticleRepository implements Serializable {
     private String databaseFilePath;
 
     private Connection getConnection() throws ClassNotFoundException, SQLException {
