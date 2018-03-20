@@ -98,6 +98,54 @@ public class InterServerCommunication extends UnicastRemoteObject implements IIn
     }
 
     @Override
+    public boolean getLockStatus()throws Exception{
+        try {
+            ServerInfoRepository serverInfoRepository = ServerInfoRepository.create();
+            return serverInfoRepository.getLockStatus();
+        } catch (Exception ex) {
+            throw new RemoteException(ex.getMessage());
+        }
+    }
+
+    @Override
+    public ArticleRepository getRepository(int port) throws Exception{
+        try{
+            Utility utility = new Utility();
+            ArticleRepository repository = new ArticleRepository(utility.getDatabaseName(port));
+            return repository;
+        } catch (Exception ex) {
+            throw new RemoteException(ex.getMessage());
+        }
+
+    }
+
+
+    @Override
+    public void unLock() throws Exception{
+        try {
+            ServerInfoRepository serverInfoRepository = ServerInfoRepository.create();
+            serverInfoRepository.unLock();
+        } catch (Exception ex) {
+            throw new RemoteException(ex.getMessage());
+        }
+    }
+
+    @Override
+    public boolean lock()throws Exception {
+        try {
+            ServerInfoRepository serverInfoRepository = ServerInfoRepository.create();
+            if(!serverInfoRepository.getLockStatus()){
+                serverInfoRepository.lock();
+                return true;
+            }
+            else
+                return false;
+        } catch (Exception ex) {
+            throw new RemoteException(ex.getMessage());
+        }
+    }
+
+    @Override
     public void WriteArticleAtReplica(int id, String content, int parentReplyId, int parentArticleId) throws RemoteException {
         System.out.println(id + " -- " + content + " -- " + parentReplyId + " - " + parentArticleId);
         try {

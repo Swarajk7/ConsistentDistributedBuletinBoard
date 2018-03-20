@@ -11,6 +11,7 @@ public class ServerInfoRepository {
     private boolean isLeader;
     private boolean hasRegistered;
     private ServerInfo ownInfo;
+    private boolean isLocked;
     private HashSet<ServerInfo> connectedServerList;
     private ServerInfoRepository() {
         hasRegistered = false;
@@ -55,6 +56,23 @@ public class ServerInfoRepository {
         return isLeader;
     }
 
+    public boolean getLockStatus()throws Exception{
+        return isLocked;
+    }
+
+    public void unLock() {
+        isLocked = false;
+    }
+
+    public synchronized boolean lock() {
+        if(!isLocked){
+            isLocked = true;
+            return true;
+        }
+        else
+            return false;
+
+    }
     public ServerInfo getOwnInfo() {
         return ownInfo;
     }
