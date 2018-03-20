@@ -14,4 +14,8 @@ public interface IProtocol {
 
     Article[] ReadArticles(int id) throws SQLException, ClassNotFoundException, IOException;
     void releaseLocks() throws Exception;
+
+    ArrayList<Article> ReadArticle(int id, int maxidseentilltime) throws Exception;
+
+    Article[] ReadArticles(int id,int maxidseentilltime) throws Exception;
 }

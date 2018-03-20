@@ -68,4 +68,14 @@ public class SequentialProtocol implements IProtocol {
     public void releaseLocks() throws Exception {
 
     }
+
+    @Override
+    public ArrayList<Article> ReadArticle(int id, int maxidseentilltime) throws SQLException, ClassNotFoundException, IOException {
+        return ReadArticle(id);
+    }
+
+    @Override
+    public Article[] ReadArticles(int id, int maxidseentilltime) throws SQLException, ClassNotFoundException, IOException {
+        return ReadArticles(id);
+    }
 }

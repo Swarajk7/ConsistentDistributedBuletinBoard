@@ -14,6 +14,7 @@ import java.net.InetAddress;
 import java.rmi.Naming;
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -95,6 +96,22 @@ public class InterServerCommunication extends UnicastRemoteObject implements IIn
             ex.printStackTrace();
             throw new RemoteException(ex.getMessage());
         }
+    }
+
+    @Override
+    public ArrayList<Article> GetDeltaArticles(int maxidindatabase) throws RemoteException {
+        ArrayList<Article> articlesToUpdate = null;
+        try {
+            Utility utility = new Utility();
+            ServerInfoRepository serverInfoRepository = ServerInfoRepository.create();
+            ArticleRepository articleRepository = new ArticleRepository(utility.getDatabaseName(serverInfoRepository.getOwnInfo().getPort()));
+
+            articlesToUpdate = articleRepository.GetDeltaArticles(maxidindatabase);
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            throw new RemoteException(ex.getMessage());
+        }
+        return articlesToUpdate;
     }
 
     @Override

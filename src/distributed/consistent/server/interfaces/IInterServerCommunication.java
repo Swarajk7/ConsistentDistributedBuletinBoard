@@ -30,5 +30,7 @@ public interface IInterServerCommunication extends Remote {
 
     int findMaxId() throws RemoteException;
 
-    void WriteArticleAtQuorumLeader(String content, int parentReplyId, int parentArticleId)throws RemoteException;
+    void WriteArticleAtQuorumLeader(String content, int parentReplyId, int parentArticleId) throws RemoteException;
+
+    ArrayList<Article> GetDeltaArticles(int maxidindatabase) throws RemoteException;
 }

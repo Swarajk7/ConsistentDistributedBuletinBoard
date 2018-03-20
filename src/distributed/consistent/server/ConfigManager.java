@@ -31,7 +31,7 @@ public class ConfigManager {
 
 
     //fix below line for better lookup.. don't hardcode
-    private static String filename = "/Users/jibinpt/Desktop/DS_2/ConsistentDistributedBuletinBoard/src/server_config.properties";
+    private static String filename = "C:\\Users\\sk111\\IdeaProjects\\ConsistentDistributedBuletinBoard\\src\\server_config.properties";
     private Properties prop;
     private static ConfigManager obj = null;
 
