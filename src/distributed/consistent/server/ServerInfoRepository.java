@@ -13,12 +13,23 @@ public class ServerInfoRepository {
     private ServerInfo ownInfo;
     private boolean isLocked;
     private HashSet<ServerInfo> connectedServerList;
+    private ServerInfo leaderInfo;
+
     private ServerInfoRepository() {
         hasRegistered = false;
         connectedServerList = new HashSet<>();
+        try {
+            ConfigManager configManager = ConfigManager.create();
+            leaderInfo = new ServerInfo(configManager.getValue(ConfigManager.LEADER_IP_ADDRESS),
+                    configManager.getIntegerValue(ConfigManager.LEADER_PORT_NUMBER),
+                    configManager.getValue(ConfigManager.LEADER_BINDING_NAME));
+        } catch (IOException e) {
+            System.out.println("Unable to find Config file in ServerInfoRepository");
+            System.exit(1);
+        }
     }
 
-    public static ServerInfoRepository create(){
+    public static ServerInfoRepository create() {
         if (repository == null) repository = new ServerInfoRepository();
         return repository;
     }
@@ -37,22 +48,22 @@ public class ServerInfoRepository {
         }
     }
 
-    public void addServerAddress(String ip, int port,String bindingName) throws Exception {
-        if(!hasRegistered) throw new Exception("Please register first by calling register()");
+    public void addServerAddress(String ip, int port, String bindingName) throws Exception {
+        if (!hasRegistered) throw new Exception("Please register first by calling register()");
         if (!isLeader) throw new Exception("Only supported for Leader");
         ServerInfo newServer = new ServerInfo(ip, port, bindingName);
         connectedServerList.add(newServer);
     }
 
-    public void removeServerAddress(String ip, int port,String bindingName) throws Exception {
-        if(!hasRegistered) throw new Exception("Please register first by calling register()");
+    public void removeServerAddress(String ip, int port, String bindingName) throws Exception {
+        if (!hasRegistered) throw new Exception("Please register first by calling register()");
         if (!isLeader) throw new Exception("Only supported for Leader");
         ServerInfo newServer = new ServerInfo(ip, port, bindingName);
         connectedServerList.remove(newServer);
     }
 
     public boolean isLeader() throws Exception {
-        if(!hasRegistered) throw new Exception("Please register first by calling register()");
+        if (!hasRegistered) throw new Exception("Please register first by calling register()");
         return isLeader;
     }
 
@@ -78,6 +89,14 @@ public class ServerInfoRepository {
     }
 
     public ArrayList<ServerInfo> getConnectedServerList() {
-        return  new ArrayList<ServerInfo>(this.connectedServerList);
+        return new ArrayList<>(this.connectedServerList);
+    }
+
+    public ServerInfo getLeaderInfo() {
+        return leaderInfo;
+    }
+
+    public void setLeaderInfo(ServerInfo leaderInfo) {
+        this.leaderInfo = leaderInfo;
     }
 }

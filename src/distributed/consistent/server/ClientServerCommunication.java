@@ -20,18 +20,18 @@ public class ClientServerCommunication  extends UnicastRemoteObject implements I
     }
 
     @Override
-    public ArrayList<Article> readArticle(int id) throws RemoteException {
+    public ArrayList<Article> readArticle(int id, int maxidseenyet) throws RemoteException {
         try {
-            return getProtocol().ReadArticle(id);
+            return getProtocol().ReadArticle(id, maxidseenyet);
         } catch (Exception e) {
             throw new RemoteException(e.getMessage());
         }
     }
 
     @Override
-    public Article[] readArticles(int id) throws RemoteException {
+    public Article[] readArticles(int id, int maxidseenyet) throws RemoteException {
         try {
-            return getProtocol().ReadArticles(id);
+            return getProtocol().ReadArticles(id, maxidseenyet);
         } catch (Exception e) {
             throw new RemoteException(e.getMessage());
         }
@@ -51,8 +51,9 @@ public class ClientServerCommunication  extends UnicastRemoteObject implements I
 
     private IProtocol getProtocol() throws IOException {
         //based on configuration create appropriate objects
-//        return new SequentialProtocol();
-        return new QuorumProtocol();
+        //return new SequentialProtocol();
+        //return new QuorumProtocol();
+        return new ReadYourWriteProtocol();
     }
 
 

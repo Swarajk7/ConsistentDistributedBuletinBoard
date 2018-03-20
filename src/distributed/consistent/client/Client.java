@@ -20,11 +20,12 @@ public class Client {
     }
 
     public static void main(String args[]) {
-        String selectedIP = "10.0.0.111";
+        String selectedIP = "10.0.0.210";
         int port = 0;
         String bindingname = "pubsubclient";
 
         int selectedArticleId = -1;
+        int maximumIdSeenYet = -1;
 
         BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
         while (true) {
@@ -66,12 +67,14 @@ public class Client {
                     case 3:
                         System.out.println("Article ID?\n");
                         int id = Integer.parseInt(reader.readLine());
-                        List<Article> articleList = getRMIStub(selectedIP, port, bindingname).readArticle(id);
+                        List<Article> articleList = getRMIStub(selectedIP, port, bindingname).readArticle(id,maximumIdSeenYet);
                         for (Article article : articleList) {
                             for (int i = 0; i < article.getIndentCount(); i++) System.out.print("  ");
                             System.out.println(article.getID() + " : " + article.getContent());
+                            maximumIdSeenYet = Math.max(article.getID(), maximumIdSeenYet);
                         }
                         selectedArticleId = id;
+                        maximumIdSeenYet = Math.max(selectedArticleId, maximumIdSeenYet);
                         break;
                     case 4:
                         System.out.println("Article Content?\n");
@@ -84,7 +87,7 @@ public class Client {
                         int displayId = 1;
                         while (displayMoreArticles) {
 
-                            Article[] articles = getRMIStub(selectedIP, port, bindingname).readArticles(displayId);
+                            Article[] articles = getRMIStub(selectedIP, port, bindingname).readArticles(displayId, maximumIdSeenYet);
 
                             if(articles.length == 0)
                                 displayMoreArticles = false;
@@ -92,10 +95,10 @@ public class Client {
                             for (int i = 0; i < articles.length; i++) {
                                 if (articles[i] != null) {
                                     System.out.println(articles[i].getID() + " : " + articles[i].getContent());
+                                    maximumIdSeenYet = Math.max(articles[i].getID(), maximumIdSeenYet);
                                 } else {
                                     displayMoreArticles = false;
                                 }
-
                             }
                             displayId = displayId + 8;
                             if (!displayMoreArticles) {
