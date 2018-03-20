@@ -18,6 +18,7 @@ public class ServerInfoReceiverThread implements Runnable {
                 ServerInfo serverInfo = multiCastHelper.receive();
                 ServerInfoRepository serverInfoRepository = ServerInfoRepository.create();
                 serverInfoRepository.setLeaderInfo(serverInfo);
+                serverInfoRepository.setIsLeader(false);
             } catch (IOException e) {
                 e.printStackTrace();
             }

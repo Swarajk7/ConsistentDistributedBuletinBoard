@@ -98,7 +98,6 @@ public class ServerInfoRepository {
 
     public void setLeaderInfo(ServerInfo leaderInfo) {
         this.leaderInfo = leaderInfo;
-        setIsLeader(true);
     }
 
     public void setIsLeader(boolean isLeader) {

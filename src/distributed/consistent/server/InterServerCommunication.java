@@ -128,26 +128,20 @@ public class InterServerCommunication extends UnicastRemoteObject implements IIn
         try {
             serverInfoRepository.lock();
             serverInfoRepository.setIsLeader(false);
-            ConfigManager configManager = ConfigManager.create();
-            String serverEndPoint = "rmi://" + configManager.getValue(ConfigManager.LEADER_IP_ADDRESS)
-                    + ":" + configManager.getValue(ConfigManager.LEADER_PORT_NUMBER) + "/" +
-                    configManager.getValue(ConfigManager.LEADER_BINDING_NAME);
-            IInterServerCommunication stub = (IInterServerCommunication) Naming.lookup(serverEndPoint);
-            ArrayList<ServerInfo> connectedServers = stub.getConnectedServers();
-            for(ServerInfo serverInfo: connectedServers) {
-                MultiCastHelper multiCastHelper = new MultiCastHelper();
-                multiCastHelper.send(serverInfo);
-            }
-            serverEndPoint = "rmi://" + info.getIp()
+            serverInfoRepository.setLeaderInfo(info);
+            MultiCastHelper multiCastHelper = new MultiCastHelper();
+            multiCastHelper.send(info);
+            String serverEndPoint = "rmi://" + info.getIp()
                     + ":" + info.getPort() + "/" +
                     info.getBindingname();
-            stub = (IInterServerCommunication) Naming.lookup(serverEndPoint);
+            IInterServerCommunication stub = (IInterServerCommunication) Naming.lookup(serverEndPoint);
             ArticleRepository articleRepository = new ArticleRepository(new Utility().
                     getDatabaseName(serverInfoRepository.getOwnInfo().getPort()));
             ArrayList<Article> articlesToUpdate = articleRepository.GetDeltaArticles(maxidatnewleader);
             stub.InsertBulkForConsistency(articlesToUpdate);
         } catch (Exception ex) {
             ex.printStackTrace();
+        } finally {
             serverInfoRepository.unLock();
         }
         return true;

@@ -4,8 +4,8 @@ import java.io.IOException;
 import java.net.*;
 
 public class MultiCastHelper {
-    final static String INET_ADDR = "224.0.0.3";
-    final static int PORT = 8888;
+    private final static String INET_ADDR = "224.0.0.3";
+    private final static int PORT = 8888;
 
     public void send(ServerInfo serverInfo) throws IOException {
         InetAddress addr = InetAddress.getByName(INET_ADDR);
@@ -29,18 +29,16 @@ public class MultiCastHelper {
             InetAddress address = InetAddress.getByName(INET_ADDR);
             clientSocket.joinGroup(address);
 
-            while (true) {
-                // Receive the information and print it.
-                DatagramPacket msgPacket = new DatagramPacket(buf, buf.length);
-                clientSocket.receive(msgPacket);
+            // Receive the information and print it.
+            DatagramPacket msgPacket = new DatagramPacket(buf, buf.length);
+            clientSocket.receive(msgPacket);
 
-                String msg = new String(buf, 0, buf.length);
-                System.out.println("Socket 1 received msg: " + msg);
+            String msg = new String(buf, 0, buf.length);
+            msg = msg.trim();
+            System.out.println("Socket 1 received msg: " + msg);
 
-                String[] split = msg.split(";", -1);
-                ServerInfo serverInfo = new ServerInfo(split[0], Integer.parseInt(split[1]), split[2]);
-                return serverInfo;
-            }
+            String[] split = msg.split(";", -1);
+            return new ServerInfo(split[0], Integer.parseInt(split[1]), split[2]);
         } catch (IOException e) {
             e.printStackTrace();
             throw e;

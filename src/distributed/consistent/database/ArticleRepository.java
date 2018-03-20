@@ -144,7 +144,7 @@ public class ArticleRepository implements Serializable {
         String sql = String.format("SELECT ID, Content, ParentReplyID, ParentArticleID From Article Where ID > %d ORDER BY ID", minid);
         System.out.println(sql);
         Statement stmt = connection.createStatement();
-        ArrayList<Article> articleList = null;
+        ArrayList<Article> articleList = new ArrayList<>();
         try {
             ResultSet rs = stmt.executeQuery(sql);
             //if no row is present return NULL to signal no data with this ID is present in the data.
