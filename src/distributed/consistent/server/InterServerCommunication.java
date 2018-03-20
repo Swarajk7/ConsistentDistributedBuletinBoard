@@ -82,6 +82,7 @@ public class InterServerCommunication extends UnicastRemoteObject implements IIn
         }
     }
 
+
     @Override
     public void WriteArticleAtQuorumLeader(String content, int parentReplyId, int parentArticleId)throws RemoteException {
         try {

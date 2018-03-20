@@ -68,11 +68,18 @@ public class ClientServerCommunication  extends UnicastRemoteObject implements I
 
 
     @Override
-    public List<String> getListOfServers() throws RemoteException {
+    public ArrayList<ServerInfo> getListOfServers() throws RemoteException {
         //client can call this function to get a list of available servers.
         //only the leader will have this information.
         //all other servers will redirect the getList requests to server.
-        throw new RemoteException("Will be implemented!");
+        try {
+            ServerInfoRepository serverInfoRepository = ServerInfoRepository.create();
+            return serverInfoRepository.getConnectedServerList();
+        } catch (Exception e) {
+            throw new RemoteException(e.getMessage());
+        }
+
+
     }
 
     @Override
