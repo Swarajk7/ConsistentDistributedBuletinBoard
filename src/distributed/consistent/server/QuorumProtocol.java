@@ -103,6 +103,10 @@ public class QuorumProtocol implements IProtocol {
                 allReplicaServers = notChosenReplicas;
             }
 
+            if(maxId == 0){
+                return new Article[0];
+            }
+
             System.out.println("Do quorum read from the following server");
             System.out.println(maxIdServerInfo.getIp() + "  " + maxIdServerInfo.getPort() + " " + maxIdServerInfo.getLockStatus());
 
@@ -130,6 +134,7 @@ public class QuorumProtocol implements IProtocol {
         Utility utility = new Utility();
         try{
 
+            System.out.println("Inside Write");
             ConfigManager configManager = ConfigManager.create();
             int quorumWriteMemberCount = configManager.getIntegerValue(ConfigManager.QUORUM_WRITE_MEMBER_COUNT);
 
@@ -172,6 +177,9 @@ public class QuorumProtocol implements IProtocol {
                 allReplicaServers = notChosenReplicas;
             }
 
+            if(maxIdServerInfo == null){
+                return;
+            }
             //Remove leader from writeQuorum list so that we have the
             //list of servers to be updated
             writeQuorum.remove(maxIdServerInfo);

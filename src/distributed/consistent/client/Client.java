@@ -86,6 +86,8 @@ public class Client {
 
                             Article[] articles = getRMIStub(selectedIP, port, bindingname).readArticles(displayId);
 
+                            if(articles.length == 0)
+                                displayMoreArticles = false;
 
                             for (int i = 0; i < articles.length; i++) {
                                 if (articles[i] != null) {
