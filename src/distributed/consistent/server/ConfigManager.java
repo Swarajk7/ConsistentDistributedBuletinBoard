@@ -18,6 +18,8 @@ public class ConfigManager {
     public static final String DATABASE_FILE_PATH = "databasefilepath";
     public static final String QUORUM_READ_MEMBER_COUNT = "quorumreadmembercount";
     public static final String QUORUM_WRITE_MEMBER_COUNT = "quorumwritemembercount";
+    public static final String SERVER_PROTOCOL = "protocol";
+
 
 
 

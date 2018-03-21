@@ -39,12 +39,14 @@ public class Client {
 
             BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
             while (true) {
-                    System.out.println("Choose an Option? \n1. JOIN A SERVER\n" +
-                            "2. CHANGE SERVER \n3. Read An Article \n4. Post An Article\n5. Display Articles\n6. Reply to " +
+                    System.out.println("Choose an Option? \n1. Choose Server\n" +
+                            "2. Read An Article \n3. Post An Article\n4. Display Articles\n5. Reply to " +
                             "Article\n");
                     int readValue = Integer.parseInt(reader.readLine());
                     switch (readValue) {
                         case 1:
+                            selectedIP = clientManager.getValue(ConfigManager.LEADER_IP_ADDRESS);
+                            port = clientManager.getIntegerValue(ConfigManager.LEADER_PORT_NUMBER);
                             ArrayList<ServerInfo> listOfServers = getRMIStub(selectedIP, port, bindingname).getListOfServers();
                             System.out.println("Select a server to connect?");
                             for(int i=0;i<listOfServers.size();i++){
@@ -52,29 +54,16 @@ public class Client {
                             }
 
                             int server = Integer.parseInt(reader.readLine());
-                            if (server == 1) {
-                                port = 5005;
+                            if(server < 1 || server > listOfServers.size()){
+                                System.out.println("Please enter a valid server number");
                             }
-                            else if(server == 2){
-                                port = 5006;
+                            else{
+                                port = listOfServers.get(server-1).getPort();
+                                System.out.println("Client joined server : " + listOfServers.get(server-1).getIp() +
+                                        ":" + port);
                             }
-                            else port = 5007;
                             break;
                         case 2:
-                            System.out.println("Select a server to connect?  ");
-                            System.out.println("1. 5005");
-                            System.out.println("2. 5006");
-                            System.out.println("3. 5007");
-                            server = Integer.parseInt(reader.readLine());
-                            if (server == 1) {
-                                port = 5005;
-                            }
-                            else if(server == 2){
-                                port = 5006;
-                            }
-                            else port = 5007;
-                            break;
-                        case 3:
                             System.out.println("Article ID?\n");
                             int id = Integer.parseInt(reader.readLine());
                             List<Article> articleList = getRMIStub(selectedIP, port, bindingname).readArticle(id,maximumIdSeenYet);
@@ -86,12 +75,12 @@ public class Client {
                             selectedArticleId = id;
                             maximumIdSeenYet = Math.max(selectedArticleId, maximumIdSeenYet);
                             break;
-                        case 4:
+                        case 3:
                             System.out.println("Article Content?\n");
                             String content = reader.readLine();
                             getRMIStub(selectedIP, port, bindingname).postArticle(content, -1, -1);
                             break;
-                        case 5:
+                        case 4:
 
                             boolean displayMoreArticles = true;
                             int displayId = 1;
@@ -99,8 +88,6 @@ public class Client {
 
                                 Article[] articles = getRMIStub(selectedIP, port, bindingname).readArticles(displayId, maximumIdSeenYet);
 
-                                if(articles.length == 0)
-                                    displayMoreArticles = false;
 
                                 for (int i = 0; i < articles.length; i++) {
                                     if (articles[i] != null) {
@@ -110,15 +97,16 @@ public class Client {
                                         displayMoreArticles = false;
                                     }
                                 }
-                                displayId = displayId + 8;
+
                                 if (!displayMoreArticles) {
                                     System.out.println("\nNo more articles to display\n");
                                     break;
                                 }
 
-
+                                displayId = articles[articles.length-1].getID() + 1;
                                 System.out.println("Do you want to display more articles? \nEnter 1 for more articles and 2 " +
                                         "if you don't want to display anymore articles");
+
                                 int moreArticles = Integer.parseInt(reader.readLine());
                                 if (moreArticles == 2) {
                                     displayMoreArticles = false;
@@ -126,7 +114,7 @@ public class Client {
 
                             }
                             break;
-                        case 6:
+                        case 5:
                             System.out.println("Please enter the article number to which you want to reply\n");
                             int articleNumber = Integer.parseInt(reader.readLine());
                             System.out.println("Please enter your reply\n");

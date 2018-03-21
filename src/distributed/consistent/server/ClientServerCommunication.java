@@ -53,7 +53,17 @@ public class ClientServerCommunication  extends UnicastRemoteObject implements I
         //based on configuration create appropriate objects
         //return new SequentialProtocol();
         //return new QuorumProtocol();
-        return new ReadYourWriteProtocol();
+        ConfigManager configManager = ConfigManager.create();
+        String protocol = configManager.getValue(ConfigManager.SERVER_PROTOCOL);
+        if(protocol.equals("quorum")){
+            return new QuorumProtocol();
+        }
+        else if(protocol.equals("readYourWrite")){
+            return new ReadYourWriteProtocol();
+        }
+        else{
+            return new SequentialProtocol();
+        }
     }
 
 

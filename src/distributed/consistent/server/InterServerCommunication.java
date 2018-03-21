@@ -60,20 +60,32 @@ public class InterServerCommunication extends UnicastRemoteObject implements IIn
 
             // Generate multiple threads and call WriteArticleAtReplica function
             ConfigManager configManager = ConfigManager.create();
-            int numer_of_publisher_threads = configManager.getIntegerValue(ConfigManager.NUMBER_OF_PUBLISH_THREADS);
+            int number_of_publisher_threads = configManager.getIntegerValue(ConfigManager.NUMBER_OF_PUBLISH_THREADS);
 
             ArrayList<ServerInfo> allReplicaServers = serverInfoRepository.getConnectedServerList();
 
+            ArrayList<ServerInfo> allReplicaServersExcludingLeader =  new ArrayList<ServerInfo>();
+
+            for(int i=0;i < allReplicaServers.size();i++){
+                ServerInfo info = allReplicaServers.get(i);
+                if(info.getPort() != serverInfoRepository.getOwnInfo().getPort() ||
+                        info.getIp() != serverInfoRepository.getOwnInfo().getIp()){
+                    allReplicaServersExcludingLeader.add(info);
+                }
+            }
+
+
+
             int index = 0;
-            while (index < allReplicaServers.size()) {
-                CallReplicaServerThread[] threads = new CallReplicaServerThread[numer_of_publisher_threads];
-                for (int i = 0; i < numer_of_publisher_threads && index < allReplicaServers.size(); i++) {
-                    threads[i] = new CallReplicaServerThread(allReplicaServers.get(index), generatedArticleId, content, parentReplyId, parentArticleId);
+            while (index < allReplicaServersExcludingLeader.size()) {
+                CallReplicaServerThread[] threads = new CallReplicaServerThread[number_of_publisher_threads];
+                for (int i = 0; i < number_of_publisher_threads && index < allReplicaServersExcludingLeader.size(); i++) {
+                    threads[i] = new CallReplicaServerThread(allReplicaServersExcludingLeader.get(index), generatedArticleId, content, parentReplyId, parentArticleId);
                     threads[i].start();
                     i++;
                     index++;
                 }
-                for (int i = 0; i < numer_of_publisher_threads; i++) if (threads[i] != null) threads[i].join();
+                for (int i = 0; i < number_of_publisher_threads; i++) if (threads[i] != null) threads[i].join();
             }
 
         } catch (Exception ex) {
