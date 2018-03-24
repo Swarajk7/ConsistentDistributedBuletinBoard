@@ -93,8 +93,4 @@ public class ClientServerCommunication  extends UnicastRemoteObject implements I
 
     }
 
-    @Override
-    public List<Article> getListOfArticles() throws RemoteException {
-        throw new RemoteException("Will be implemented!");
-    }
 }

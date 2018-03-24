@@ -14,6 +14,4 @@ public interface IClientServerCommunication extends Remote {
     Article[] readArticles(int id,  int maxidseenyet) throws RemoteException;
     int postArticle(String content, int parentReplyId, int parentArticleId) throws RemoteException;
     ArrayList<ServerInfo> getListOfServers() throws RemoteException;
-    List<Article> getListOfArticles() throws RemoteException;
-    void releaseLocks() throws RemoteException;
 }
