@@ -16,7 +16,7 @@ import java.util.ArrayList;
 
 public class ReadYourWriteProtocol implements IProtocol {
     @Override
-    public void RequestMainServerForWrite(String content, int parentReplyId, int parentArticleId) throws Exception {
+    public int RequestMainServerForWrite(String content, int parentReplyId, int parentArticleId) throws Exception {
         ServerInfoRepository serverInfoRepository = ServerInfoRepository.create();
         System.out.println(serverInfoRepository.getLeaderInfo());
         ArticleRepository repository = new ArticleRepository(new Utility().getDatabaseName(serverInfoRepository.getOwnInfo().getPort()));
@@ -33,7 +33,7 @@ public class ReadYourWriteProtocol implements IProtocol {
             serverInfoRepository.setLeaderInfo(serverInfoRepository.getOwnInfo());
             serverInfoRepository.setIsLeader(true);
         }
-        repository.WriteArticleAndGenerateID(content, parentReplyId, parentArticleId);
+        return repository.WriteArticleAndGenerateID(content, parentReplyId, parentArticleId);
     }
 
     @Override

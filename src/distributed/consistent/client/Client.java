@@ -18,6 +18,7 @@ public class Client {
         String serverEndPoint = "rmi://" + ip
                 + ":" + port + "/" +
                 bindingname;
+        System.out.println(serverEndPoint);
         return (IClientServerCommunication) Naming.lookup(serverEndPoint);
     }
 
@@ -128,6 +129,7 @@ public class Client {
                     }
             }
         }catch (Exception ex) {
+            ex.printStackTrace();
                 System.out.println(ex.getMessage());
         }
     }

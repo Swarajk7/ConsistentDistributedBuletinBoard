@@ -30,6 +30,7 @@ public class ClientServerCommunication  extends UnicastRemoteObject implements I
 
     @Override
     public Article[] readArticles(int id, int maxidseenyet) throws RemoteException {
+        System.out.println("readArticles()");
         try {
             return getProtocol().ReadArticles(id, maxidseenyet);
         } catch (Exception e) {
@@ -40,13 +41,14 @@ public class ClientServerCommunication  extends UnicastRemoteObject implements I
     @Override
     public int postArticle(String content, int parentReplyId, int parentArticleId) throws RemoteException {
         System.out.println(content);
+        int returnedid;
         try {
             IProtocol protocol = getProtocol();
-            protocol.RequestMainServerForWrite(content, parentReplyId, parentArticleId);
+            returnedid = protocol.RequestMainServerForWrite(content, parentReplyId, parentArticleId);
         } catch (Exception e) {
             throw new RemoteException(e.getMessage());
         }
-        return 0;
+        return returnedid;
     }
 
     private IProtocol getProtocol() throws IOException {
@@ -55,14 +57,13 @@ public class ClientServerCommunication  extends UnicastRemoteObject implements I
         //return new QuorumProtocol();
         ConfigManager configManager = ConfigManager.create();
         String protocol = configManager.getValue(ConfigManager.SERVER_PROTOCOL);
-        if(protocol.equals("quorum")){
-            return new QuorumProtocol();
-        }
-        else if(protocol.equals("readYourWrite")){
-            return new ReadYourWriteProtocol();
-        }
-        else{
-            return new SequentialProtocol();
+        switch (protocol) {
+            case "quorum":
+                return new QuorumProtocol();
+            case "readYourWrite":
+                return new ReadYourWriteProtocol();
+            default:
+                return new SequentialProtocol();
         }
     }
 

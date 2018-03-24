@@ -8,7 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public interface IProtocol {
-    void RequestMainServerForWrite(String content, int parentReplyId, int parentArticleId) throws Exception;
+    int RequestMainServerForWrite(String content, int parentReplyId, int parentArticleId) throws Exception;
 
     ArrayList<Article> ReadArticle(int id) throws SQLException, ClassNotFoundException, IOException;
 

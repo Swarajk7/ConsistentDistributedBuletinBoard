@@ -295,8 +295,9 @@ public class QuorumProtocol implements IProtocol {
             ex.printStackTrace();
         }
     }
-    public void RequestMainServerForWrite(String content, int parentReplyId, int parentArticleId) throws Exception {
-        WriteArticlesToQuorum(content, parentReplyId,parentArticleId);
+    public int RequestMainServerForWrite(String content, int parentReplyId, int parentArticleId) throws Exception {
+        WriteArticlesToQuorum(content, parentReplyId, parentArticleId);
+        return 0;
     }
 
 //    public ServerInfo RequestMainServerForReadQuorumLeader(int id) throws Exception {

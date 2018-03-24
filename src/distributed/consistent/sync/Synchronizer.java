@@ -25,7 +25,7 @@ public class Synchronizer {
         List<ServerInfo> connectedServers = getLeaderRMIStub().getConnectedServers();
         ArrayList<ServerInfoWithMaxId> serverInfoWithMaxIdArrayList = new ArrayList<>();
         for (ServerInfo serverInfo : connectedServers) {
-            if (serverInfo.getPort() != 5005) {
+            if (serverInfo.getPort() != 500) {
                 String serverEndPoint = "rmi://" + serverInfo.getIp()
                         + ":" + serverInfo.getPort() + "/" +
                         serverInfo.getBindingname();
