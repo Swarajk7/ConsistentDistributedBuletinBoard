@@ -66,6 +66,7 @@ public class Client {
                     case 2:
                         System.out.println("Article ID?\n");
                         int id = Integer.parseInt(reader.readLine());
+                        replyUnderSelectedArticle.clear();
                         List<Article> articleList = getRMIStub(selectedIP, port, bindingname).readArticle(id, maximumIdSeenYet);
                         for (Article article : articleList) {
                             for (int i = 0; i < article.getIndentCount(); i++) System.out.print("  ");
