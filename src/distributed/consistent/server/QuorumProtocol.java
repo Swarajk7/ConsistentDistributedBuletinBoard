@@ -35,7 +35,7 @@ public class QuorumProtocol implements IProtocol {
 
     //Gets stub of the primary server
     private IInterServerCommunication getPrimaryRMIStub() throws Exception {
-        Thread.sleep(1000);
+        Thread.sleep(100);
         ConfigManager clientManager = ConfigManager.create();
 
         // get stub for calling InterServer RMI functions.
@@ -47,7 +47,7 @@ public class QuorumProtocol implements IProtocol {
 
 
     private IInterServerCommunication getQuorumLeaderRMIStub(ServerInfo maxIdServerInfo) throws Exception {
-        Thread.sleep(1000);
+        Thread.sleep(100);
         // get stub for calling InterServer RMI functions.
         String serverEndPoint = "rmi://" + maxIdServerInfo.getIp()
                 + ":" + maxIdServerInfo.getPort() + "/" +
@@ -59,7 +59,7 @@ public class QuorumProtocol implements IProtocol {
 
 
     private IInterServerCommunication getRMIStub(ServerInfo maxIdServerInfo) throws Exception {
-        Thread.sleep(1000);
+        Thread.sleep(100);
         // get stub for calling InterServer RMI functions.
         String serverEndPoint = "rmi://" + maxIdServerInfo.getIp()
                 + ":" + maxIdServerInfo.getPort() + "/" +
@@ -311,17 +311,6 @@ public class QuorumProtocol implements IProtocol {
         WriteArticlesToQuorum(content, parentReplyId, parentArticleId);
         return 0;
     }
-
-//    public ServerInfo RequestMainServerForReadQuorumLeader(int id) throws Exception {
-//
-//        // initiate write request at main server by calling InitiatePost method.
-//        // after this message main server will start propagating messages to other servers.
-//        ServerInfo maxIdServerInfo = getRMIStub().findQuorumLeader();
-////        System.out.println("SDSDSDSDSDSDSD");
-//        System.out.println(maxIdServerInfo.getPort());
-//        return maxIdServerInfo;
-
-//    }
 
     public ArrayList<ServerInfo> getJoinedServerListFromPrimary() throws Exception{
         return getPrimaryRMIStub().getConnectedServers();
