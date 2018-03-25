@@ -18,7 +18,6 @@ public class ReadYourWriteProtocol implements IProtocol {
     @Override
     public int RequestMainServerForWrite(String content, int parentReplyId, int parentArticleId) throws Exception {
         ServerInfoRepository serverInfoRepository = ServerInfoRepository.create();
-        System.out.println(serverInfoRepository.getLeaderInfo());
         ArticleRepository repository = new ArticleRepository(new Utility().getDatabaseName(serverInfoRepository.getOwnInfo().getPort()));
         if (!serverInfoRepository.isLeader()) {
             IInterServerCommunication stub = getRMIStubFromServerInfo(serverInfoRepository.getLeaderInfo());
@@ -53,14 +52,12 @@ public class ReadYourWriteProtocol implements IProtocol {
 
     @Override
     public ArrayList<Article> ReadArticle(int id, int maxidseentilltime) throws Exception {
-        System.out.println("ReadArticle() " + id + "--" + maxidseentilltime);
         UpdateServerWithRecentDataIfOutOfSync(maxidseentilltime);
         return ReadArticle(id);
     }
 
     @Override
     public Article[] ReadArticles(int id, int maxidseentilltime) throws Exception {
-        System.out.println("ReadArticles() " + id + "--" + maxidseentilltime);
         UpdateServerWithRecentDataIfOutOfSync(maxidseentilltime);
         return ReadArticles(id);
     }
@@ -69,13 +66,11 @@ public class ReadYourWriteProtocol implements IProtocol {
         String serverEndPoint = "rmi://" + serverInfo.getIp()
                 + ":" + serverInfo.getPort() + "/" +
                 serverInfo.getBindingname();
-        System.out.println(serverEndPoint);
         return (IInterServerCommunication) Naming.lookup(serverEndPoint);
     }
 
     private void UpdateServerWithRecentDataIfOutOfSync(int maxidseentilltime) throws Exception {
         ServerInfoRepository serverInfoRepository = ServerInfoRepository.create();
-        System.out.println(serverInfoRepository.getLeaderInfo());
         if(serverInfoRepository.isLeader()) return;
         Utility utility = new Utility();
         ArticleRepository repository = new ArticleRepository(utility.getDatabaseName(serverInfoRepository.getOwnInfo().getPort()));

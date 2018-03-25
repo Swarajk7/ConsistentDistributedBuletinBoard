@@ -24,7 +24,7 @@ public class ArticleRepository implements Serializable {
         Connection connection = this.getConnection();
         String sql = "CREATE TABLE IF NOT EXISTS Article (ID INTEGER NOT NULL,Content VARCHAR(100) NOT NULL,ParentReplyID INT, ParentArticleID INT)";
         Statement stmt = connection.createStatement();
-        System.out.println(sql);
+        //System.out.println(sql);
         stmt.executeUpdate(sql);
         stmt.close();
         connection.close();
@@ -34,7 +34,7 @@ public class ArticleRepository implements Serializable {
         Connection connection = this.getConnection();
         String sql = String.format("SELECT ID, Content, ParentReplyID From Article Where ID = %d union select ID," +
                 " Content,ParentReplyID From Article Where ParentArticleID = %d ", id, id);
-        System.out.println(sql);
+        //System.out.println(sql);
         Statement stmt = connection.createStatement();
         ResultSet rs = stmt.executeQuery(sql);
         //if no row is present return NULL to signal no data with this ID is present in the data.
@@ -122,7 +122,7 @@ public class ArticleRepository implements Serializable {
             String sql = String.format("Insert Into ARTICLE (ID, Content, ParentReplyID, ParentArticleID) VALUES(%d,'%s','%s','%s')",
                     nextid, content, parentReplyIDStr, parentArticleIDStr);
 
-            System.out.println(sql);
+            //System.out.println(sql);
             stmt.executeUpdate(sql);
 
             connection.commit();
@@ -142,7 +142,7 @@ public class ArticleRepository implements Serializable {
         // this will be called assuming server is upto date with most recent data.
         Connection connection = this.getConnection();
         String sql = String.format("SELECT ID, Content, ParentReplyID, ParentArticleID From Article Where ID > %d ORDER BY ID", minid);
-        System.out.println(sql);
+        //System.out.println(sql);
         Statement stmt = connection.createStatement();
         ArrayList<Article> articleList = new ArrayList<>();
         try {

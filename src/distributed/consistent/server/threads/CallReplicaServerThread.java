@@ -32,7 +32,6 @@ public class CallReplicaServerThread extends Thread implements Runnable {
             String serverEndPoint = "rmi://" + serverInfo.getIp()
                     + ":" + serverInfo.getPort() + "/" +
                     serverInfo.getBindingname();
-            System.out.println(serverEndPoint);
             IInterServerCommunication stub = (IInterServerCommunication) Naming.lookup(serverEndPoint);
 
             stub.WriteArticleAtReplica(this.id, this.content,this.parentReplyId, this.parentArticleId);

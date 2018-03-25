@@ -5,6 +5,7 @@ import distributed.consistent.database.ArticleRepository;
 import distributed.consistent.server.interfaces.IClientServerCommunication;
 import distributed.consistent.server.interfaces.IInterServerCommunication;
 import distributed.consistent.server.threads.ServerInfoReceiverThread;
+import distributed.consistent.sync.SyncHelper;
 
 import java.io.IOException;
 import java.net.*;
@@ -75,7 +76,6 @@ public class Server {
             if (!serverInfoRepository.isLeader()) {
                 // if not a leader, join Main Server. Main server will add these other servers to a hashset inside ServerRepository class.
                 joinMainServer(serverInfoRepository);
-
             } else {
                 System.out.println("I AM THE BOSS!!");
             }
@@ -93,6 +93,10 @@ public class Server {
             // start interserver RMI
             IInterServerCommunication stub = new InterServerCommunication();
             Naming.rebind(getRMIEndpoint(ip, port, ConfigManager.create().getValue(ConfigManager.RMI_BINDING_NAME)), stub);
+
+
+            // Before taking the client's request sync with other server.
+            SyncHelper.sync();
 
             // start client communication RMI
             IClientServerCommunication stub2 = new ClientServerCommunication();

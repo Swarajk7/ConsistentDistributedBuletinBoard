@@ -21,6 +21,7 @@ public class ClientServerCommunication  extends UnicastRemoteObject implements I
 
     @Override
     public ArrayList<Article> readArticle(int id, int maxidseenyet) throws RemoteException {
+        System.out.println(String.format("readArticle(articleid = %d)", id));
         try {
             return getProtocol().ReadArticle(id, maxidseenyet);
         } catch (Exception e) {
@@ -30,7 +31,7 @@ public class ClientServerCommunication  extends UnicastRemoteObject implements I
 
     @Override
     public Article[] readArticles(int id, int maxidseenyet) throws RemoteException {
-        System.out.println("readArticles()");
+        System.out.println(String.format("readArticles(startid = %d)", id));
         try {
             return getProtocol().ReadArticles(id, maxidseenyet);
         } catch (Exception e) {
@@ -40,7 +41,7 @@ public class ClientServerCommunication  extends UnicastRemoteObject implements I
 
     @Override
     public int postArticle(String content, int parentReplyId, int parentArticleId) throws RemoteException {
-        System.out.println(content);
+        System.out.println(String.format("postArticle(content=%s parent=%d preply=%d)", content, parentArticleId, parentReplyId));
         int returnedid;
         try {
             IProtocol protocol = getProtocol();
@@ -83,14 +84,12 @@ public class ClientServerCommunication  extends UnicastRemoteObject implements I
         //client can call this function to get a list of available servers.
         //only the leader will have this information.
         //all other servers will redirect the getList requests to server.
+        System.out.println("getListOfServers()");
         try {
             ServerInfoRepository serverInfoRepository = ServerInfoRepository.create();
             return serverInfoRepository.getConnectedServerList();
         } catch (Exception e) {
             throw new RemoteException(e.getMessage());
         }
-
-
     }
-
 }

@@ -43,17 +43,15 @@ public class SequentialProtocol implements IProtocol {
     }
 
 
-
-
     @Override
     public ArrayList<Article> ReadArticle(int id) throws SQLException, ClassNotFoundException, IOException {
-            ServerInfoRepository serverInfoRepository = ServerInfoRepository.create();
-            Utility utility = new Utility();
+        ServerInfoRepository serverInfoRepository = ServerInfoRepository.create();
+        Utility utility = new Utility();
 
-            // Read article from own database using current article id.
-            // hoping that article would already have been propagated.
-            ArticleRepository repository = new ArticleRepository(utility.getDatabaseName(serverInfoRepository.getOwnInfo().getPort()));
-            return  repository.ReadArticle(id);
+        // Read article from own database using current article id.
+        // hoping that article would already have been propagated.
+        ArticleRepository repository = new ArticleRepository(utility.getDatabaseName(serverInfoRepository.getOwnInfo().getPort()));
+        return repository.ReadArticle(id);
     }
 
     @Override
@@ -64,7 +62,7 @@ public class SequentialProtocol implements IProtocol {
         // Read article from own database using current article id.
         // hoping that article would already have been propagated.
         ArticleRepository repository = new ArticleRepository(utility.getDatabaseName(serverInfoRepository.getOwnInfo().getPort()));
-        return  repository.ReadArticles(id);
+        return repository.ReadArticles(id);
     }
 
     public void releaseLocks() throws Exception {

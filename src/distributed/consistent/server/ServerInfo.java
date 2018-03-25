@@ -60,4 +60,21 @@ public class ServerInfo implements Serializable {
     public String toString() {
         return ip + ":" + port + "/" + bindingname;
     }
+
+    @Override
+    public boolean equals(Object o) {
+
+        if (o instanceof ServerInfo) {
+            ServerInfo serverInfo = (ServerInfo) o;
+            return serverInfo.toString().equals(this.toString());
+        }
+        return false;
+    }
+
+
+
+    @Override
+    public int hashCode() {
+        return this.toString().hashCode();
+    }
 }

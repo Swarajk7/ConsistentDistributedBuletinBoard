@@ -18,7 +18,6 @@ public class Client {
         String serverEndPoint = "rmi://" + ip
                 + ":" + port + "/" +
                 bindingname;
-        System.out.println(serverEndPoint);
         return (IClientServerCommunication) Naming.lookup(serverEndPoint);
     }
 
@@ -36,6 +35,7 @@ public class Client {
             String bindingname = "serverclient";
 
             int selectedArticleId = -1;
+            ArrayList<Integer> replyUnderSelectedArticle = new ArrayList<>();
             int maximumIdSeenYet = -1;
 
             BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
@@ -71,6 +71,7 @@ public class Client {
                             for (int i = 0; i < article.getIndentCount(); i++) System.out.print("  ");
                             System.out.println(article.getID() + " : " + article.getContent());
                             maximumIdSeenYet = Math.max(article.getID(), maximumIdSeenYet);
+                            replyUnderSelectedArticle.add(article.getID());
                         }
                         selectedArticleId = id;
                         maximumIdSeenYet = Math.max(selectedArticleId, maximumIdSeenYet);
@@ -117,11 +118,18 @@ public class Client {
                         }
                         break;
                     case 5:
+                        if (selectedArticleId == -1) {
+                            System.out.println("Please select an article first.");
+                            break;
+                        }
                         System.out.println("Please enter the article number to which you want to reply\n");
                         int articleNumber = Integer.parseInt(reader.readLine());
+                        if (!replyUnderSelectedArticle.contains(articleNumber)) {
+                            System.out.println("Make sure you have selected the right id.");
+                            break;
+                        }
                         System.out.println("Please enter your reply\n");
                         String reply = reader.readLine();
-                        if (selectedArticleId == -1) selectedArticleId = articleNumber;
                         generatedid = getRMIStub(selectedIP, port, bindingname).postArticle(reply, articleNumber, selectedArticleId);
                         maximumIdSeenYet = Math.max(generatedid, maximumIdSeenYet);
                         break;
@@ -131,7 +139,6 @@ public class Client {
                 }
             }
         } catch (Exception ex) {
-            ex.printStackTrace();
             System.out.println(ex.getMessage());
         }
     }

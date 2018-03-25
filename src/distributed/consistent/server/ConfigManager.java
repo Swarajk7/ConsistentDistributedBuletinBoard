@@ -19,12 +19,13 @@ public class ConfigManager {
     public static final String QUORUM_READ_MEMBER_COUNT = "quorumreadmembercount";
     public static final String QUORUM_WRITE_MEMBER_COUNT = "quorumwritemembercount";
     public static final String SERVER_PROTOCOL = "protocol";
+    public static final String SYNC_SLEEP_TIME_IN_SECONDS = "syncsleeptimeinseconds";
 
 
 
 
     //fix below line for better lookup.. don't hardcode
-    private static String filename = "server_config.properties";
+    private static String filename = "C:\\Users\\sk111\\IdeaProjects\\ConsistentDistributedBuletinBoard\\src\\server_config.properties";
     private Properties prop;
     private static ConfigManager obj = null;
 

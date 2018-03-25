@@ -26,7 +26,7 @@ public class InterServerCommunication extends UnicastRemoteObject implements IIn
 
     @Override
     public void joinMainServer(String rmi_registry_address, String rmi_binding_name, int portnum) throws RemoteException {
-        System.out.println(rmi_registry_address + ":" + portnum + "/" + rmi_binding_name);
+        System.out.println("JOINED: " + rmi_registry_address + ":" + portnum + "/" + rmi_binding_name);
         try {
             ServerInfoRepository serverInfoRepository = ServerInfoRepository.create();
             serverInfoRepository.addServerAddress(rmi_registry_address, portnum, rmi_binding_name);
@@ -64,12 +64,12 @@ public class InterServerCommunication extends UnicastRemoteObject implements IIn
 
             ArrayList<ServerInfo> allReplicaServers = serverInfoRepository.getConnectedServerList();
 
-            ArrayList<ServerInfo> allReplicaServersExcludingLeader =  new ArrayList<ServerInfo>();
+            ArrayList<ServerInfo> allReplicaServersExcludingLeader = new ArrayList<>();
 
             for(int i=0;i < allReplicaServers.size();i++){
                 ServerInfo info = allReplicaServers.get(i);
                 if(info.getPort() != serverInfoRepository.getOwnInfo().getPort() ||
-                        info.getIp() != serverInfoRepository.getOwnInfo().getIp()){
+                        !info.getIp().equals(serverInfoRepository.getOwnInfo().getIp())){
                     allReplicaServersExcludingLeader.add(info);
                 }
             }
@@ -256,7 +256,7 @@ public class InterServerCommunication extends UnicastRemoteObject implements IIn
 
     @Override
     public void UpdateQuorumMembers(ArrayList<ServerInfoWithMaxId> serverInfoWithMaxIdArrayList) throws RemoteException {
-        System.out.println("UpdateQuorumMembers(): Count -> " + serverInfoWithMaxIdArrayList.size());
+        //System.out.println("UpdateQuorumMembers(): Count -> " + serverInfoWithMaxIdArrayList.size());
         try {
             Utility utility = new Utility();
 
@@ -283,7 +283,6 @@ public class InterServerCommunication extends UnicastRemoteObject implements IIn
     }
 
     public void InsertBulkForConsistency(ArrayList<Article> articleArrayList) throws RemoteException {
-        System.out.println("InsertBulkForConsistency()");
         try {
             Utility utility = new Utility();
 
@@ -310,7 +309,6 @@ public class InterServerCommunication extends UnicastRemoteObject implements IIn
             e.printStackTrace();
             throw new RemoteException(e.getMessage());
         }
-        System.out.println("Found Max Id = " + maxid);
         return maxid;
     }
 }
