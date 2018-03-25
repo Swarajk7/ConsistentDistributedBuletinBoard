@@ -35,6 +35,7 @@ public class QuorumProtocol implements IProtocol {
 
     //Gets stub of the primary server
     private IInterServerCommunication getPrimaryRMIStub() throws Exception {
+        Thread.sleep(1000);
         ConfigManager clientManager = ConfigManager.create();
 
         // get stub for calling InterServer RMI functions.
@@ -46,6 +47,7 @@ public class QuorumProtocol implements IProtocol {
 
 
     private IInterServerCommunication getQuorumLeaderRMIStub(ServerInfo maxIdServerInfo) throws Exception {
+        Thread.sleep(1000);
         // get stub for calling InterServer RMI functions.
         String serverEndPoint = "rmi://" + maxIdServerInfo.getIp()
                 + ":" + maxIdServerInfo.getPort() + "/" +
@@ -57,6 +59,7 @@ public class QuorumProtocol implements IProtocol {
 
 
     private IInterServerCommunication getRMIStub(ServerInfo maxIdServerInfo) throws Exception {
+        Thread.sleep(1000);
         // get stub for calling InterServer RMI functions.
         String serverEndPoint = "rmi://" + maxIdServerInfo.getIp()
                 + ":" + maxIdServerInfo.getPort() + "/" +
@@ -240,7 +243,7 @@ public class QuorumProtocol implements IProtocol {
 
             ArrayList<ServerInfo> allReplicaServers = getJoinedServerListFromPrimary();
             Collections.shuffle(allReplicaServers);
-            
+
             ServerInfoWithMaxId maxIdServerInfo = null;
             int maxId = 0;
 

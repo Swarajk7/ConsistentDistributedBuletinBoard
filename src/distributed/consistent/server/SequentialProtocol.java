@@ -23,6 +23,7 @@ public class SequentialProtocol implements IProtocol {
     }
 
     private IInterServerCommunication getRMIStub() throws Exception {
+        Thread.sleep(1000);
         ConfigManager clientManager = ConfigManager.create();
 
         // get stub for calling InterServer RMI functions.

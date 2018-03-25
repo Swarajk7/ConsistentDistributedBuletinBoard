@@ -37,6 +37,9 @@ public class Client {
             int selectedArticleId = -1;
             ArrayList<Integer> replyUnderSelectedArticle = new ArrayList<>();
             int maximumIdSeenYet = -1;
+            long startTime = 0;
+            long endTime = 0;
+
 
             BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
             while (true) {
@@ -67,6 +70,7 @@ public class Client {
                         System.out.println("Article ID?\n");
                         int id = Integer.parseInt(reader.readLine());
                         replyUnderSelectedArticle.clear();
+                        startTime = System.currentTimeMillis();
                         List<Article> articleList = getRMIStub(selectedIP, port, bindingname).readArticle(id, maximumIdSeenYet);
                         for (Article article : articleList) {
                             for (int i = 0; i < article.getIndentCount(); i++) System.out.print("  ");
@@ -74,14 +78,19 @@ public class Client {
                             maximumIdSeenYet = Math.max(article.getID(), maximumIdSeenYet);
                             replyUnderSelectedArticle.add(article.getID());
                         }
+                        endTime = System.currentTimeMillis();
+                        System.out.println("Read took " + (endTime - startTime) + " milliseconds");
                         selectedArticleId = id;
                         maximumIdSeenYet = Math.max(selectedArticleId, maximumIdSeenYet);
                         break;
                     case 3:
                         System.out.println("Article Content?\n");
                         String content = reader.readLine();
+                        startTime = System.currentTimeMillis();
                         int generatedid = getRMIStub(selectedIP, port, bindingname).
                                 postArticle(content, -1, -1);
+                        endTime = System.currentTimeMillis();
+                        System.out.println("Write took " + (endTime - startTime) + " milliseconds");
                         maximumIdSeenYet = Math.max(generatedid, maximumIdSeenYet);
                         break;
                     case 4:

@@ -62,7 +62,8 @@ public class ReadYourWriteProtocol implements IProtocol {
         return ReadArticles(id);
     }
 
-    private IInterServerCommunication getRMIStubFromServerInfo(ServerInfo serverInfo) throws RemoteException, NotBoundException, MalformedURLException {
+    private IInterServerCommunication getRMIStubFromServerInfo(ServerInfo serverInfo) throws RemoteException, NotBoundException, MalformedURLException, InterruptedException {
+        Thread.sleep(1000);
         String serverEndPoint = "rmi://" + serverInfo.getIp()
                 + ":" + serverInfo.getPort() + "/" +
                 serverInfo.getBindingname();
