@@ -70,8 +70,9 @@ public class QuorumProtocol implements IProtocol {
     @Override
     public ArrayList<Article> ReadArticle(int id) throws SQLException, ClassNotFoundException, IOException {
         Utility utility = new Utility();
-        try{
-            ArrayList<ServerInfo> readQuorum = new  ArrayList<ServerInfo>();
+        ArrayList<ServerInfo> readQuorum = new ArrayList<ServerInfo>();
+        ArrayList<Article> articles = new ArrayList<>();
+        try {
             ConfigManager configManager = ConfigManager.create();
             //Get the number of quorum read members from the config file
             int quorumReadMemberCount = configManager.getIntegerValue(ConfigManager.QUORUM_READ_MEMBER_COUNT);
@@ -81,33 +82,35 @@ public class QuorumProtocol implements IProtocol {
             ServerInfo maxIdServerInfo = null;
             int maxId = 0;
 
-            while(readQuorum.size() != quorumReadMemberCount){
+            while (readQuorum.size() != quorumReadMemberCount) {
                 ArrayList<ServerInfo> notChosenReplicas = new ArrayList<ServerInfo>();
-                for(int i = 0; i < allReplicaServers.size();i++){
-                    ServerInfo serverDetails =  allReplicaServers.get(i);
-                    IInterServerCommunication serverStub = getRMIStub(serverDetails);
-                    if(serverStub.lock()){
-                        System.out.println("Locked server " + serverDetails.getIp() + ":" + serverDetails.getPort());
-                        readQuorum.add(serverDetails);
-                        ArticleRepository repository = serverStub.getRepository(serverDetails.getPort());
-                        int currId = repository.findMaxId();
-                        if(currId > maxId){
-                            maxId = currId;
-                            maxIdServerInfo = serverDetails;
+                for (int i = 0; i < allReplicaServers.size(); i++) {
+                    try {
+                        ServerInfo serverDetails = allReplicaServers.get(i);
+                        IInterServerCommunication serverStub = getRMIStub(serverDetails);
+                        if (serverStub.lock()) {
+                            System.out.println("Locked server " + serverDetails.getIp() + ":" + serverDetails.getPort());
+                            readQuorum.add(serverDetails);
+                            ArticleRepository repository = serverStub.getRepository(serverDetails.getPort());
+                            int currId = repository.findMaxId();
+                            if (currId > maxId) {
+                                maxId = currId;
+                                maxIdServerInfo = serverDetails;
+                            }
+                            if (readQuorum.size() == quorumReadMemberCount) {
+                                break;
+                            }
+                        } else {
+                            notChosenReplicas.add(serverDetails);
                         }
-                        if(readQuorum.size() == quorumReadMemberCount){
-                            break;
-                        }
-                    }
-                    else{
-                        notChosenReplicas.add(serverDetails);
-                    }
+                    } catch (Exception e) {
 
+                    }
                 }
                 allReplicaServers = notChosenReplicas;
             }
 
-            if(maxId == 0){
+            if (maxId == 0) {
                 releaseQuorumMembers(readQuorum);
                 return new ArrayList<Article>();
             }
@@ -116,18 +119,15 @@ public class QuorumProtocol implements IProtocol {
 
             //Get the repository object of the server associated with  maxIdServerInfo
             ArticleRepository repository = serverStub.getRepository(maxIdServerInfo.getPort());
+            articles = repository.ReadArticle(id);
 
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        } finally {
             //Release lock on the quorum members
             releaseQuorumMembers(readQuorum);
-
-            return  repository.ReadArticle(id);
-
-        }catch (Exception ex){
-            ex.printStackTrace();
         }
-
-        return new ArrayList<Article>();
-
+        return articles;
     }
 
     @Override
@@ -149,28 +149,30 @@ public class QuorumProtocol implements IProtocol {
             ServerInfo maxIdServerInfo = null;
             int maxId = 0;
 
-            while(readQuorum.size() != quorumReadMemberCount){
+            while(readQuorum.size() != quorumReadMemberCount) {
                 ArrayList<ServerInfo> notChosenReplicas = new ArrayList<ServerInfo>();
-                for(int i = 0; i < allReplicaServers.size();i++){
-                    ServerInfo serverDetails =  allReplicaServers.get(i);
-                    IInterServerCommunication serverStub = getRMIStub(serverDetails);
-                    if(serverStub.lock()){
-                        System.out.println("Locked server " + serverDetails.getIp() + ":" + serverDetails.getPort());
-                        readQuorum.add(serverDetails);
-                        ArticleRepository repository = serverStub.getRepository(serverDetails.getPort());
-                        int currId = repository.findMaxId();
-                        if(currId > maxId){
-                            maxId = currId;
-                            maxIdServerInfo = serverDetails;
+                for (int i = 0; i < allReplicaServers.size(); i++) {
+                    try {
+                        ServerInfo serverDetails = allReplicaServers.get(i);
+                        IInterServerCommunication serverStub = getRMIStub(serverDetails);
+                        if (serverStub.lock()) {
+                            System.out.println("Locked server " + serverDetails.getIp() + ":" + serverDetails.getPort());
+                            readQuorum.add(serverDetails);
+                            ArticleRepository repository = serverStub.getRepository(serverDetails.getPort());
+                            int currId = repository.findMaxId();
+                            if (currId > maxId) {
+                                maxId = currId;
+                                maxIdServerInfo = serverDetails;
+                            }
+                            if (readQuorum.size() == quorumReadMemberCount) {
+                                break;
+                            }
+                        } else {
+                            notChosenReplicas.add(serverDetails);
                         }
-                        if(readQuorum.size() == quorumReadMemberCount){
-                            break;
-                        }
-                    }
-                    else{
-                        notChosenReplicas.add(serverDetails);
-                    }
+                    } catch (Exception ex) {
 
+                    }
                 }
                 allReplicaServers = notChosenReplicas;
             }
@@ -230,49 +232,50 @@ public class QuorumProtocol implements IProtocol {
 
     public void WriteArticlesToQuorum(String content, int parentReplyId, int parentArticleId) throws SQLException, ClassNotFoundException, IOException {
         Utility utility = new Utility();
-        try{
+        ArrayList<ServerInfoWithMaxId> writeQuorum = new ArrayList<ServerInfoWithMaxId>();
+        try {
             ConfigManager configManager = ConfigManager.create();
             int quorumWriteMemberCount = configManager.getIntegerValue(ConfigManager.QUORUM_WRITE_MEMBER_COUNT);
 
-            if(quorumWriteMemberCount < 1){
+            if (quorumWriteMemberCount < 1) {
                 throw new RemoteException("Write Quorum should have atleast 1 server");
             }
 
             ArrayList<ServerInfo> allReplicaServers = getJoinedServerListFromPrimary();
             Collections.shuffle(allReplicaServers);
-            
+
             ServerInfoWithMaxId maxIdServerInfo = null;
             int maxId = 0;
 
-            ArrayList<ServerInfoWithMaxId> writeQuorum = new ArrayList<ServerInfoWithMaxId>();
-
             //  Stay in the while loop until  quorumWriteMemberCount servers are locked for write quorum
-            while(writeQuorum.size() != quorumWriteMemberCount){
+            while (writeQuorum.size() != quorumWriteMemberCount) {
                 ArrayList<ServerInfo> notChosenReplicas = new ArrayList<ServerInfo>();
-                for(int i = 0; i < allReplicaServers.size();i++){
-                    ServerInfo serverDetails =  allReplicaServers.get(i);
+                for (int i = 0; i < allReplicaServers.size(); i++) {
+                    try {
+                        ServerInfo serverDetails = allReplicaServers.get(i);
 
-                    IInterServerCommunication serverStub = getRMIStub(serverDetails);
-                    if(serverStub.lock()){
-                        System.out.println("Locked server " + serverDetails.getIp() + ":" + serverDetails.getPort());
-                        ArticleRepository repository = serverStub.getRepository(serverDetails.getPort());
-                        int currId = repository.findMaxId();
-                        ServerInfoWithMaxId serverMaxIdInfo = new ServerInfoWithMaxId(serverDetails.getIp(),
-                                serverDetails.getPort(),serverDetails.getBindingname(),currId);
+                        IInterServerCommunication serverStub = getRMIStub(serverDetails);
+                        if (serverStub.lock()) {
+                            System.out.println("Locked server " + serverDetails.getIp() + ":" + serverDetails.getPort());
+                            ArticleRepository repository = serverStub.getRepository(serverDetails.getPort());
+                            int currId = repository.findMaxId();
+                            ServerInfoWithMaxId serverMaxIdInfo = new ServerInfoWithMaxId(serverDetails.getIp(),
+                                    serverDetails.getPort(), serverDetails.getBindingname(), currId);
 
-                        writeQuorum.add(serverMaxIdInfo);
-                        if(currId >= maxId){
-                            maxIdServerInfo = serverMaxIdInfo;
+                            writeQuorum.add(serverMaxIdInfo);
+                            if (currId >= maxId) {
+                                maxIdServerInfo = serverMaxIdInfo;
+                            }
+
+                            if (writeQuorum.size() == quorumWriteMemberCount) {
+                                break;
+                            }
+                        } else {
+                            notChosenReplicas.add(serverDetails);
                         }
+                    } catch (Exception ex) {
 
-                        if(writeQuorum.size() == quorumWriteMemberCount){
-                            break;
-                        }
                     }
-                    else{
-                        notChosenReplicas.add(serverDetails);
-                    }
-
                 }
                 allReplicaServers = notChosenReplicas;
             }
@@ -293,13 +296,14 @@ public class QuorumProtocol implements IProtocol {
             //Add leader quorum member to the write quorum
             writeQuorum.add(maxIdServerInfo);
 
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        } finally {
             //Release lock on other quorum members
             releaseWriteQuorumMembers(writeQuorum);
-
-        }catch (Exception ex){
-            ex.printStackTrace();
         }
     }
+
     public int RequestMainServerForWrite(String content, int parentReplyId, int parentArticleId) throws Exception {
         WriteArticlesToQuorum(content, parentReplyId, parentArticleId);
         return 0;

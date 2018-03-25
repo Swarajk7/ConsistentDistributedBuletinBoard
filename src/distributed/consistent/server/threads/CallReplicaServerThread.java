@@ -27,16 +27,16 @@ public class CallReplicaServerThread extends Thread implements Runnable {
 
     @Override
     public void run() {
+        // get stub for calling InterServer RMI functions.
+        String serverEndPoint = "rmi://" + serverInfo.getIp()
+                + ":" + serverInfo.getPort() + "/" +
+                serverInfo.getBindingname();
         try {
-            // get stub for calling InterServer RMI functions.
-            String serverEndPoint = "rmi://" + serverInfo.getIp()
-                    + ":" + serverInfo.getPort() + "/" +
-                    serverInfo.getBindingname();
             IInterServerCommunication stub = (IInterServerCommunication) Naming.lookup(serverEndPoint);
 
-            stub.WriteArticleAtReplica(this.id, this.content,this.parentReplyId, this.parentArticleId);
+            stub.WriteArticleAtReplica(this.id, this.content, this.parentReplyId, this.parentArticleId);
         } catch (Exception e) {
-            e.printStackTrace();
+            System.out.println("Could not reach Server @ " + serverEndPoint);
         }
     }
 }
