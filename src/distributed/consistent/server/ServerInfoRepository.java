@@ -57,9 +57,10 @@ public class ServerInfoRepository {
 
     public void removeServerAddress(String ip, int port, String bindingName) throws Exception {
         if (!hasRegistered) throw new Exception("Please register first by calling register()");
-        if (!isLeader) throw new Exception("Only supported for Leader");
+        //if (!isLeader) throw new Exception("Only supported for Leader");
         ServerInfo newServer = new ServerInfo(ip, port, bindingName);
-        connectedServerList.remove(newServer);
+        if (connectedServerList.contains(newServer))
+            connectedServerList.remove(newServer);
     }
 
     public boolean isLeader() throws Exception {
