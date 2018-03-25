@@ -4,6 +4,7 @@ import distributed.consistent.Utility;
 import distributed.consistent.database.ArticleRepository;
 import distributed.consistent.server.interfaces.IClientServerCommunication;
 import distributed.consistent.server.interfaces.IInterServerCommunication;
+import distributed.consistent.server.threads.LeaveServerOnShutdownThread;
 import distributed.consistent.server.threads.ServerInfoReceiverThread;
 import distributed.consistent.sync.SyncHelper;
 
@@ -76,6 +77,7 @@ public class Server {
             if (!serverInfoRepository.isLeader()) {
                 // if not a leader, join Main Server. Main server will add these other servers to a hashset inside ServerRepository class.
                 joinMainServer(serverInfoRepository);
+                Runtime.getRuntime().addShutdownHook(new LeaveServerOnShutdownThread());
             } else {
                 System.out.println("I AM THE BOSS!!");
             }
@@ -106,7 +108,7 @@ public class Server {
 
             new ServerInfoReceiverThread();
         } catch (Exception ex) {
-            ex.printStackTrace();
+            System.out.println(ex.getMessage());
         }
     }
 }

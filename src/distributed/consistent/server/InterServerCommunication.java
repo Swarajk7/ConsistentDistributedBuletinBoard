@@ -37,7 +37,7 @@ public class InterServerCommunication extends UnicastRemoteObject implements IIn
 
     @Override
     public void leaveMainServer(String rmi_registry_address, String rmi_binding_name, int portnum) throws RemoteException {
-        System.out.println(rmi_registry_address + ":" + portnum + "/" + rmi_binding_name);
+        System.out.println("LEFT: " + rmi_registry_address + ":" + portnum + "/" + rmi_binding_name);
         try {
             ServerInfoRepository serverInfoRepository = ServerInfoRepository.create();
             serverInfoRepository.removeServerAddress(rmi_registry_address, portnum, rmi_binding_name);
