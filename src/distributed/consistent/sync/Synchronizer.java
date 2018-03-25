@@ -25,7 +25,7 @@ public class Synchronizer {
         List<ServerInfo> connectedServers = getLeaderRMIStub().getConnectedServers();
         ArrayList<ServerInfoWithMaxId> serverInfoWithMaxIdArrayList = new ArrayList<>();
         for (ServerInfo serverInfo : connectedServers) {
-            if (serverInfo.getPort() != 500) {
+            if (serverInfo.getPort() != 5005) {
                 String serverEndPoint = "rmi://" + serverInfo.getIp()
                         + ":" + serverInfo.getPort() + "/" +
                         serverInfo.getBindingname();
@@ -37,15 +37,16 @@ public class Synchronizer {
         }
         getLeaderRMIStub().UpdateQuorumMembers(serverInfoWithMaxIdArrayList);
     }
+
     public static void main(String[] args) {
 
-        //while (true) {
-        try {
-            sync();
-            Thread.sleep(10000);
-        } catch (Exception e) {
-            e.printStackTrace();
+        while (true) {
+            try {
+                sync();
+                Thread.sleep(10000);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
-        //}
     }
 }
