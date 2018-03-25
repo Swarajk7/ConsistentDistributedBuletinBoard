@@ -61,7 +61,7 @@ public class QuorumProtocol implements IProtocol {
         String serverEndPoint = "rmi://" + maxIdServerInfo.getIp()
                 + ":" + maxIdServerInfo.getPort() + "/" +
                 maxIdServerInfo.getBindingname();
-        System.out.println(serverEndPoint);
+        //System.out.println(serverEndPoint);
         return (IInterServerCommunication) Naming.lookup(serverEndPoint);
     }
 

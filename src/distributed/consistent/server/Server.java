@@ -106,7 +106,7 @@ public class Server {
 
             new ServerInfoReceiverThread();
         } catch (Exception ex) {
-            ex.printStackTrace();
+            System.out.println(ex.getMessage());
         }
     }
 }
