@@ -12,6 +12,7 @@ import java.rmi.Naming;
 import java.rmi.RemoteException;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Collections;
 
 public class QuorumProtocol implements IProtocol {
     private ArticleRepository articleRepository;
@@ -76,6 +77,7 @@ public class QuorumProtocol implements IProtocol {
             int quorumReadMemberCount = configManager.getIntegerValue(ConfigManager.QUORUM_READ_MEMBER_COUNT);
 
             ArrayList<ServerInfo> allReplicaServers = getJoinedServerListFromPrimary();
+            Collections.shuffle(allReplicaServers);
             ServerInfo maxIdServerInfo = null;
             int maxId = 0;
 
@@ -143,6 +145,7 @@ public class QuorumProtocol implements IProtocol {
             int quorumReadMemberCount = configManager.getIntegerValue(ConfigManager.QUORUM_READ_MEMBER_COUNT);
 
             ArrayList<ServerInfo> allReplicaServers = getJoinedServerListFromPrimary();
+            Collections.shuffle(allReplicaServers);
             ServerInfo maxIdServerInfo = null;
             int maxId = 0;
 
@@ -236,6 +239,8 @@ public class QuorumProtocol implements IProtocol {
             }
 
             ArrayList<ServerInfo> allReplicaServers = getJoinedServerListFromPrimary();
+            Collections.shuffle(allReplicaServers);
+            
             ServerInfoWithMaxId maxIdServerInfo = null;
             int maxId = 0;
 
