@@ -27,6 +27,7 @@ public class MultiCastHelper {
         try (MulticastSocket clientSocket = new MulticastSocket(PORT)) {
             //Joint the Multicast group.
             InetAddress address = InetAddress.getByName(INET_ADDR);
+            clientSocket.setNetworkInterface(NetworkInterface.getByName("en0"));
             clientSocket.joinGroup(address);
 
             // Receive the information and print it.

@@ -61,6 +61,7 @@ public class Client {
                         if (server < 1 || server > listOfServers.size()) {
                             System.out.println("Please enter a valid server number");
                         } else {
+                            selectedIP = listOfServers.get(server - 1).getIp();
                             port = listOfServers.get(server - 1).getPort();
                             System.out.println("Client joined server : " + listOfServers.get(server - 1).getIp() +
                                     ":" + port);
