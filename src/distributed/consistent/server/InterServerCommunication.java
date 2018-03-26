@@ -138,9 +138,15 @@ public class InterServerCommunication extends UnicastRemoteObject implements IIn
         ServerInfoRepository serverInfoRepository = ServerInfoRepository.create();
         if (serverInfoRepository.getLockStatus()) return false;
         try {
+            // lock current server, so that no other server can change the leader.
+            // only one leader change at a time.
+            // For a concurrent write request, it will change leader later after receiving the multicast message.
             serverInfoRepository.lock();
+
             serverInfoRepository.setIsLeader(false);
             serverInfoRepository.setLeaderInfo(info);
+
+            // multicast information about new leader.
             MultiCastHelper multiCastHelper = new MultiCastHelper();
             multiCastHelper.send(info);
             String serverEndPoint = "rmi://" + info.getIp()
@@ -150,6 +156,8 @@ public class InterServerCommunication extends UnicastRemoteObject implements IIn
             ArticleRepository articleRepository = new ArticleRepository(new Utility().
                     getDatabaseName(serverInfoRepository.getOwnInfo().getPort()));
             ArrayList<Article> articlesToUpdate = articleRepository.GetDeltaArticles(maxidatnewleader);
+
+            // send the delta to new leader.
             stub.InsertBulkForConsistency(articlesToUpdate);
         } catch (Exception ex) {
             ex.printStackTrace();
