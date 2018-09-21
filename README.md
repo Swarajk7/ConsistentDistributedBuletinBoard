@@ -1,3 +1,8 @@
+### Distributed Bulletin Board
+In this project, we implemented simple Bulletin Board (BB) system. Clients can post, reply,and read articles stored in the BB.The BB is maintained by a group of replicated servers that offer ​sequential consistency, Quorum consistency or Read-your-Write consistency​. We have used RPC for all our communications.
+
+Read detailed report at : [detailed report](report.pdf)
+
 ### How to run?
 
 In IntelliJ
@@ -10,3 +15,4 @@ In IntelliJ
 Now able to write from any server and calling main server from that server. 
 
 Reading code is also done. Need to implement propagation code though using multicast and notify client on write completion.
+
