@@ -1,7 +1,7 @@
 ### Distributed Bulletin Board
 In this project, we implemented simple Bulletin Board (BB) system. Clients can post, reply,and read articles stored in the BB.The BB is maintained by a group of replicated servers that offer ​sequential consistency, Quorum consistency or Read-your-Write consistency​. We have used RPC for all our communications.
 
-Read detailed report at : [detailed report](report.pdf)
+Read detailed report at : [detailed report](Report.pdf)
 
 ### How to run?
 
